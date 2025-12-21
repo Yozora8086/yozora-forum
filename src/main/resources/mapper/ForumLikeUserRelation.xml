@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.lcy.yozoraforum.mapper.ForumLikeUserRelationMapper">
+  <insert id="insertRelation">
+      insert ignore into forum_like_user_relation (forum_id,user_id) values
+      <foreach collection="userId" item="uid" separator=",">
+          (#{forumId},#{uid})
+      </foreach>
+
+  </insert>
+
+    <select id="isExist" resultType="int">
+        SELECT COUNT(*)
+        FROM forum_like_user_relation
+        WHERE forum_id = #{forumId}
+        AND user_id IN
+        <foreach collection="userIdList" item="uid" open="(" separator="," close=")">
+            #{uid}
+        </foreach>
+    </select>
+</mapper>
