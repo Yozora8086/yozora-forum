@@ -1,7 +1,10 @@
 package com.lcy.yozoraforum.service;
 
+import com.alibaba.fastjson.JSONObject;
 import com.lcy.yozoraforum.mapper.ForumLikeUserRelationMapper;
 import com.lcy.yozoraforum.mapper.ForumMapper;
+import com.lcy.yozoraforum.wrapper.ForumLikeUserRelationWrapper;
+import io.lettuce.core.json.JsonObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.redis.core.Cursor;
@@ -13,8 +16,12 @@ import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLIntegrityConstraintViolationException;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 @Service
@@ -30,15 +37,18 @@ public class LikeSyncTask {
     @Scheduled(fixedDelay = 10000)
     @Async("taskExecutor")
     public void syncLikeUser(){
+        //扫描帖子点赞的用户数据
         ScanOptions options = ScanOptions.scanOptions()
                 .match("like:forum:*")
                 .count(100)
                 .build();
 
-        //发起scan,拿到游标
+
+        //发起scan,拿到游标(扫描帖子点赞的用户数据)
         Cursor<byte[]> cursor = redisTemplate.getConnectionFactory()
                 .getConnection()
                 .scan(options);
+
 
         while (cursor.hasNext()){
             //将字节转换成字符串(Redis协议底层就是字节,)
@@ -58,27 +68,42 @@ public class LikeSyncTask {
                 continue;
             }
 
-            //获取帖子点赞用户的ID
-            Set<Object> userIdObList = redisTemplate.opsForSet().members(key);
-            Set<Integer> userIdList = new HashSet<>();
+            //获取该帖子点赞用户的集合
+            Map<Object,Object> userIdMap = redisTemplate.opsForHash().entries(key);
+            //用于执行mybatis语句的参数集合
+            Set<ForumLikeUserRelationWrapper> userIdList = new HashSet<>();
 
-            //将id遍历放入UserIdList中
-            for (Object o : userIdObList) {
-                userIdList.add(Integer.valueOf(o.toString()));
+            //遍历该帖子点赞用户的集合
+            for (Map.Entry<Object, Object> entry : userIdMap.entrySet()) {
+                //获取键
+                Integer userId = Integer.valueOf(entry.getKey().toString());
+                //获取值
+                String jsonValue = entry.getValue().toString();
+
+                //获取的值是json数据，进行解析
+                JSONObject object = JSONObject.parseObject(jsonValue);
+                Integer status = object.getInteger("status");
+                Long ts = object.getLong("ts");
+
+                //帖子用户点赞关联wrapper对象赋值
+                ForumLikeUserRelationWrapper forumLikeUserRelationWrapper = ForumLikeUserRelationWrapper.builder()
+                        .forumId(forumId)//被点赞帖子id
+                        .userId(userId)//点赞用户id
+                        .status(status)//点赞状态(0是取消状态/1是点赞状态)
+                        .updateTime(LocalDateTime.ofInstant(
+                                //将毫秒转换成(yyyy-MM-dd HH:mm:ss)
+                                Instant.ofEpochMilli(ts),
+                                //指定时区，系统默认
+                                ZoneId.systemDefault()))
+                        .build();
+                //将对象加入到集合中用于批量写入
+                userIdList.add(forumLikeUserRelationWrapper);
             }
 
-            //判断数据库是否存在这条数据，如果存在就代表已经写入过一次了，将其redis中的数据删除
-//            int exist = forumLikeUserRelationMapper.isExist(forumId, userIdList);
-//
-//            if (exist != 0){
-//                redisTemplate.delete(key);
-//                System.out.println("删除前 key: '" + key + "'");
-//                continue;
-//            }
 
             try {
                 //写入数据库
-                forumLikeUserRelationMapper.insertRelation(forumId,userIdList);
+                forumLikeUserRelationMapper.insertRelation(userIdList);
             } catch (DuplicateKeyException e) {
 
             }
@@ -120,15 +145,10 @@ public class LikeSyncTask {
             } catch (NumberFormatException e){
                 continue;
             }
-            //将Redis中的赞归0
-            Object countOb = redisTemplate.opsForValue().getAndSet(key, 0);
+
+            Object countOb = redisTemplate.opsForValue().get(key);
 
             Integer count = Integer.valueOf(countOb.toString());
-
-            //判断数据是否为0
-            if (count == null || count <= 0) {
-                continue;
-            }
 
             //写入数据库
             forumMapper.updateLike(forumId, count);

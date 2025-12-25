@@ -13,5 +13,5 @@ public class ForumLikeUserRelation {
     //帖子id
     private Integer forumId;
     //用户id
-    private Integer user_Id;
+    private Integer userId;
 }

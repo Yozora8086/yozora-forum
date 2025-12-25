@@ -15,11 +15,20 @@ import com.lcy.yozoraforum.wrapper.ForumWrapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.ParameterResolutionDelegate;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Service;
 
+import javax.xml.crypto.Data;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class ForumServiceImpl implements ForumService {
@@ -30,7 +39,7 @@ public class ForumServiceImpl implements ForumService {
     @Autowired
     private TagsMapper tagsMapper;
     @Autowired
-    private RedisTemplate redisTemplate;
+    private StringRedisTemplate redisTemplate;
     /**
      * 用户发布论坛帖子
      * @param forumDTO
@@ -113,27 +122,44 @@ public class ForumServiceImpl implements ForumService {
      */
     @Override
     public boolean like(ShowForumDTO showForumDTO) {
+        //从resource读取Lua脚本文件
+        ClassPathResource resource = new ClassPathResource("lua/like.lua");
+        //luaScript脚本语句变量初始化
+        String luaScript = null;
+        try {
+            //获取lua脚本语句
+            luaScript = new String(Files.readAllBytes(resource.getFile().toPath()), StandardCharsets.UTF_8);
+        } catch (IOException e){
+            throw new RuntimeException("读取 Lua 脚本失败", e);
+        }
+
+        //创建一个redis lua脚本的包装对象
+        DefaultRedisScript<Long> redisScript = new DefaultRedisScript<>();
+        //装载脚本
+        redisScript.setScriptText(luaScript);
+        //设置脚本返回值
+        redisScript.setResultType(Long.class);
+
         //设置redis中Set集合的key,在 Redis里,Key通常设计成："业务名:对象类型:对象ID"
         String setLikeKey = "like:forum:" + showForumDTO.getForumId();
         String setLikeCountKey = "like:count:" + showForumDTO.getForumId();
 
-        //判断当前登录用户是否已经点过赞了
-        Long added = redisTemplate.opsForSet().add(setLikeKey, BaseContext.getCurrentId());
-        if (added == 0){
-            //帖子点赞数-1
-            redisTemplate.opsForValue().decrement(setLikeCountKey);
-            //未办！！！！！！！！！！！！
-            //未办！！！！！！！！！！！！
-            //未办！！！！！！！！！！！！
-            //未办！！！！！！！！！！！！
-            //帖子点赞落库后，取消点赞只删除掉redis中的数据，而MySQL中数据未删除
-            redisTemplate.opsForSet().remove(setLikeKey,BaseContext.getCurrentId());
-            return false;
+        //脚本所需数据
+        List<String> keys = Arrays.asList(setLikeKey,setLikeCountKey);
+        List<String> args = Arrays.asList(String.valueOf(BaseContext.getCurrentId()),String.valueOf(3 * 24 * 60 * 60));
+
+        System.out.println(luaScript);
+
+        Long result = null;
+        try {
+            //脚本执行
+            result = redisTemplate.execute(redisScript, keys, args.toArray(new String[0]));
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
-        //帖子点赞数+1
-        redisTemplate.opsForValue().increment(setLikeCountKey);
-        return true;
+        return result != null && result == 1;
+
     }
 
 

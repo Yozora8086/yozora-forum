@@ -42,6 +42,6 @@ public interface ForumMapper {
      * @param forumId
      * @param count
      */
-    @Update("update forum set forum_like = forum_like + #{count} where forum_id = #{forumId}")
+    @Update("update forum set forum_like = #{count} where forum_id = #{forumId}")
     void updateLike(Integer forumId, Integer count);
 }
