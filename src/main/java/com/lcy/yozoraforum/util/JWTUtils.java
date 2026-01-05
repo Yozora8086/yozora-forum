@@ -18,7 +18,7 @@ public class JWTUtils {
      * @param userId
      * @return
      */
-    public static String createToken(int userId){
+    public static String createToken(Long userId){
         Map<String,Object> claims = new HashMap<>();
         claims.put("userId",userId);
         JwtBuilder jwtBuilder = Jwts.builder()

@@ -9,9 +9,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ForumLikeUserRelation {
     //帖子用户点赞--帖子关联id
-    private Integer relationId;
+    private Long relationId;
     //帖子id
-    private Integer forumId;
+    private Long forumId;
     //用户id
-    private Integer userId;
+    private Long userId;
 }

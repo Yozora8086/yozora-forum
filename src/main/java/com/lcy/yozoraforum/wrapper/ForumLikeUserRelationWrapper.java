@@ -13,9 +13,9 @@ import java.time.LocalDateTime;
 @Builder
 public class ForumLikeUserRelationWrapper {
     //帖子id
-    private Integer forumId;
+    private Long forumId;
     //用户id
-    private Integer userId;
+    private Long userId;
     //点赞状态
     private Integer status;
     //时间戳

@@ -3,9 +3,11 @@ package com.lcy.yozoraforum.controller;
 import com.lcy.yozoraforum.dto.ForumDTO;
 import com.lcy.yozoraforum.dto.ShowForumDTO;
 import com.lcy.yozoraforum.entity.Forum;
+import com.lcy.yozoraforum.service.CommentsService;
 import com.lcy.yozoraforum.service.ForumService;
 import com.lcy.yozoraforum.service.impl.ForumServiceImpl;
 import com.lcy.yozoraforum.util.Result;
+import com.lcy.yozoraforum.vo.ForumCommentsVO;
 import com.lcy.yozoraforum.vo.ForumVo;
 import com.lcy.yozoraforum.wrapper.ForumWrapper;
 import org.springframework.beans.BeanUtils;
@@ -25,6 +27,8 @@ import java.util.stream.Collectors;
 public class ForumController {
     @Autowired
     private ForumService forumService;
+    @Autowired
+    private CommentsService commentsService;
     /**
      * 用户发布论坛帖子
      * @param forumDTO
@@ -43,7 +47,7 @@ public class ForumController {
      * @return
      */
   @GetMapping("/showList")
-    public Result<List<ForumVo>> showForumList(int page, int pageSize){
+    public Result<List<ForumVo>> showForumList(@RequestParam int page,@RequestParam int pageSize){
        List<Forum> forumList = forumService.showForumList(page,pageSize);
        //stream流操作,把每个 Forum 转成 ForumVo。
        List<ForumVo> forumVoList = forumList.stream()
@@ -67,12 +71,14 @@ public class ForumController {
      * @return
      */
   @GetMapping("/showForum")
-   public Result<ForumVo> showForum(@RequestBody ShowForumDTO showForumDTO){
+   public Result<ForumCommentsVO> showForum(@RequestBody ShowForumDTO showForumDTO){
       ForumWrapper forumWrapper = forumService.showForum(showForumDTO);
 
       ForumVo forumVo = new ForumVo();
       //将ForumWrapper对象赋值给ForumVo对象
       BeanUtils.copyProperties(forumWrapper,forumVo);
+
+       = commentsService.showComment(showForumDTO);
 
       return Result.success(forumVo);
    }

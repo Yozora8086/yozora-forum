@@ -60,10 +60,10 @@ public class LikeSyncTask {
             //删除like:forum:前缀
             String forumIdStr = key.substring("like:forum:".length());
 
-            Integer forumId;
+            Long forumId;
             try {
                 //类型转换
-                forumId = Integer.valueOf(forumIdStr);
+                forumId = Long.valueOf(forumIdStr);
             } catch (NumberFormatException e){
                 continue;
             }
@@ -76,7 +76,7 @@ public class LikeSyncTask {
             //遍历该帖子点赞用户的集合
             for (Map.Entry<Object, Object> entry : userIdMap.entrySet()) {
                 //获取键
-                Integer userId = Integer.valueOf(entry.getKey().toString());
+                Long userId = Long.valueOf(entry.getKey().toString());
                 //获取值
                 String jsonValue = entry.getValue().toString();
 
@@ -138,10 +138,10 @@ public class LikeSyncTask {
             }
             //删除like:count:*前缀
             String forumIdStr = key.substring("like:count:".length());
-            Integer forumId;
+            Long forumId;
             try {
                 //类型转换
-                forumId = Integer.valueOf(forumIdStr);
+                forumId = Long.valueOf(forumIdStr);
             } catch (NumberFormatException e){
                 continue;
             }

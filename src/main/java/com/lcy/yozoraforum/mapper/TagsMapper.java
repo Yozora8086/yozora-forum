@@ -13,5 +13,5 @@ public interface TagsMapper {
      * @param tagsList
      * @return
      */
-    List<Integer> selectTags(List<Tags> tagsList);
+    List<Long> selectTags(List<Tags> tagsList);
 }

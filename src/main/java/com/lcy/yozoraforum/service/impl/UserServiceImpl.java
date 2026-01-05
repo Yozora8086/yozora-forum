@@ -56,6 +56,11 @@ public class UserServiceImpl implements UserService {
         if (userRegisterDTO.getUserPassword() == null || userRegisterDTO.getUserPassword().isEmpty() || (userRegisterDTO.getUserPassword().length() > 20 || userRegisterDTO.getUserPassword().length() < 6)){
             throw new RegisterArgsErrorException("密码不合法");
         }
+        //判断该用户名和邮箱是否已经被使用
+        int rows = userMapper.isExist(userRegisterDTO.getUserName(),userRegisterDTO.getUserEmail());
+        if (rows != 0){
+            throw new RegisterArgsErrorException("邮箱/用户名已被使用");
+        }
         //将密码使用md5加密
         userRegisterDTO.setUserPassword(DigestUtils.md5DigestAsHex(userRegisterDTO.getUserPassword().getBytes()));
         //将DTO数据拷贝到User对象中

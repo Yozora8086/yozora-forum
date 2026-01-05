@@ -34,7 +34,8 @@ public class LoginInterceptor implements HandlerInterceptor {
         //校验令牌
 
         Claims claims = JWTUtils.checkToken(token);
-        BaseContext.setCurrentId((Integer) claims.get("userId"));
+        java.lang.Number userId =(Number) claims.get("userId");
+        BaseContext.setCurrentId(userId.longValue());
         return true;
     }
 

@@ -8,6 +8,7 @@
             (#{tagId},#{forumId})
         </foreach>
     </insert>
+
     <select id="selectTags" resultType="com.lcy.yozoraforum.entity.Tags">
         select t.tag_id, t.tag_name
         from forum_tag_relation f

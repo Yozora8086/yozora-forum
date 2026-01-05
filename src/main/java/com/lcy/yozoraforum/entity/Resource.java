@@ -9,9 +9,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class Resource {
     //资源id
-    private int resourceId;
+    private Long resourceId;
     //上传资源用户id
-    private int userId;
+    private Long userId;
     //资源标题
     private String resourceTitle;
     //资源内容介绍

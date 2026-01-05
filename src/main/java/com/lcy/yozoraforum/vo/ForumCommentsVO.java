@@ -2,19 +2,11 @@ package com.lcy.yozoraforum.vo;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.lcy.yozoraforum.entity.Tags;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
-public class ForumVo {
+public class ForumCommentsVO {
     //论坛帖子id
     private Long forumId;
     //论坛帖子标题
@@ -30,4 +22,6 @@ public class ForumVo {
     private Long userId;
     //论坛帖子的分类标签
     List<Tags> tags;
+    //帖子评论
+    List<CommentsVO> comments;
 }

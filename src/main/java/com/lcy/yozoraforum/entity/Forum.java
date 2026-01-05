@@ -12,7 +12,7 @@ import java.util.List;
 @NoArgsConstructor
 public class Forum {
     //论坛帖子id
-    private Integer forumId;
+    private Long forumId;
     //论坛帖子标题
     private String forumTitle;
     //论坛帖子内容
@@ -26,7 +26,7 @@ public class Forum {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime updateDate;
     //论坛帖子发布用户id
-    private Integer userId;
+    private Long userId;
 
 
 

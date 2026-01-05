@@ -1,5 +1,6 @@
 package com.lcy.yozoraforum.handler;
 
+import com.lcy.yozoraforum.exception.CommentIsNullException;
 import com.lcy.yozoraforum.util.Result;
 import io.jsonwebtoken.ExpiredJwtException;
 import org.springframework.web.bind.annotation.ExceptionHandler;

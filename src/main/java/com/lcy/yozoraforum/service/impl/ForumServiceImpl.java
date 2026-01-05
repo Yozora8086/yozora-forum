@@ -61,11 +61,11 @@ public class ForumServiceImpl implements ForumService {
         forum.setUpdateDate(LocalDateTime.now());
 
         //查询集合中所有分类标签对应的id
-        List<Integer> tagsId = tagsMapper.selectTags(tagsList);
+        List<Long> tagsId = tagsMapper.selectTags(tagsList);
 
         //插入论坛帖子数据，并返回帖子对应的id
         forumMapper.insert(forum);
-        Integer forumId = forum.getForumId();
+        Long forumId = forum.getForumId();
         System.out.println(forumId);
 
         //将论坛帖子和分类标签进行绑定到帖子分类标签表

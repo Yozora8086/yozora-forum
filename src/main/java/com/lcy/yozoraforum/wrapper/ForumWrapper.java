@@ -16,7 +16,7 @@ import java.util.List;
 @Builder
 public class ForumWrapper {
     //论坛帖子id
-    private int forumId;
+    private Long forumId;
     //论坛帖子标题
     private String forumTitle;
     //论坛帖子内容
@@ -27,7 +27,7 @@ public class ForumWrapper {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createDate;
     //论坛帖子发布用户id
-    private int userId;
+    private Long userId;
     //论坛帖子的分类标签
     List<Tags> tags;
 }

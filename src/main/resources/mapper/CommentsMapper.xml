@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.lcy.yozoraforum.mapper.CommentsMapper">
+    <insert id="insert">
+        insert into comments
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            user_id,
+            forum_id,
+            resource_id,
+            parent_id,
+            create_time,
+            comment_like,
+            <if test="insertCommentsDTO.content != null and insertCommentsDTO.content != ''">content</if>
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            #{userId},
+            #{insertCommentsDTO.forumId},
+            #{insertCommentsDTO.resourceId},
+            #{insertCommentsDTO.parentId},
+            now(),
+            0
+            <if test="insertCommentsDTO.content != null and insertCommentsDTO.content != ''">, #{insertCommentsDTO.content}</if>
+        </trim>
+    </insert>
+
+</mapper>

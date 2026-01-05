@@ -9,9 +9,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ForumTagRelation {
     //帖子-分类标签关联id
-    private int relationId;
+    private Long relationId;
     //分类标签id
-    private int tagId;
+    private Long tagId;
     //帖子id
-    private int forumId;
+    private Long forumId;
 }

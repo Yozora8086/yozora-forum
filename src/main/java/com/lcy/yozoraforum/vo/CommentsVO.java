@@ -1,24 +1,19 @@
-package com.lcy.yozoraforum.entity;
+package com.lcy.yozoraforum.vo;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
-public class Comments {
-    //评论id
-    private Long commentId;
-    //评论帖子id
-    private Long forumId;
+public class CommentsVO {
     //评论资源id
     private Long resource;
     //评论用户id
-    private Long userId;
+    private Long userCommentId;
     //评论内容
     private String content;
     //上级id,顶级为0
@@ -27,5 +22,4 @@ public class Comments {
     private LocalDateTime createTime;
     //评论获得的赞
     private int commentLike;
-
 }

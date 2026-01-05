@@ -9,5 +9,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ShowForumDTO {
     //论坛帖子id
-    private Integer forumId;
+    private Long forumId;
 }

@@ -4,13 +4,13 @@ package com.lcy.yozoraforum.context;
  * 在线程中处理用户Id
  */
 public class BaseContext {
-    public static ThreadLocal<Integer> threadLocal = new ThreadLocal<>();
+    public static ThreadLocal<Long> threadLocal = new ThreadLocal<>();
 
     /**
      * 保存用户id
      * @param id
      */
-    public static void setCurrentId(Integer id){
+    public static void setCurrentId(Long id){
         threadLocal.set(id);
     }
 
@@ -18,7 +18,7 @@ public class BaseContext {
      * 获取用户id
      * @return
      */
-    public static Integer getCurrentId(){
+    public static Long getCurrentId(){
         return threadLocal.get();
     }
 

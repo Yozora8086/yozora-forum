@@ -11,11 +11,11 @@ import java.time.LocalDateTime;
 
 public class Notification {
     //通知信息id
-    private int notificationId;
+    private Long notificationId;
     //收到通知用户id
-    private int userId;
+    private Long userId;
     //触发者（发起者，其他用户或者系统）
-    private int senderId;
+    private Long senderId;
     //通知类型 如评论，点赞，系统
     private String type;
     //被操作对象类型 如帖子，资源，评论

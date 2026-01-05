@@ -24,4 +24,13 @@ public interface UserMapper {
             "values " +
             "(#{userName},#{userEmail},#{userPassword},#{userLevel},#{userAge},#{registerTime})")
     void insertUser(User user);
+
+    /**
+     * 判断该用户名和邮箱是否已经被使用
+     * @param userName
+     * @param userEmail
+     * @return
+     */
+    @Select("select count(*) from user where user_name = #{userName} or user_email = #{userEmail}")
+    int isExist(String userName, String userEmail);
 }

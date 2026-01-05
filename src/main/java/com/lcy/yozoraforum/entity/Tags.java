@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class Tags {
     //分类标签id
-    private Integer tagId;
+    private Long tagId;
     //分类标签名称
     private String tagName;
 }

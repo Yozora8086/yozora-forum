@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class UserVo {
     //用户ID
-    private int userId;
+    private Long userId;
     //用户昵称
     private String userName;
     //令牌token

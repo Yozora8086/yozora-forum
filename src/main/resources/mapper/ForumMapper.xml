@@ -5,6 +5,10 @@
       select * from forum order by create_date desc limit #{offset},#{pageSize}
   </select>
 
+    <select id="showMineForumList" resultType="com.lcy.yozoraforum.entity.Forum">
+        select * from forum where user_id = #{userId} order by create_date desc limit #{offset},#{pageSize}
+    </select>
+
     <select id="selectForum" resultType="com.lcy.yozoraforum.entity.Forum">
         select * from forum where forum_id = #{forumId}
     </select>
