@@ -3,10 +3,12 @@ package com.lcy.yozoraforum.controller;
 import com.lcy.yozoraforum.dto.ForumDTO;
 import com.lcy.yozoraforum.dto.ShowForumDTO;
 import com.lcy.yozoraforum.entity.Forum;
+import com.lcy.yozoraforum.entity.Comments;
 import com.lcy.yozoraforum.service.CommentsService;
 import com.lcy.yozoraforum.service.ForumService;
 import com.lcy.yozoraforum.service.impl.ForumServiceImpl;
 import com.lcy.yozoraforum.util.Result;
+import com.lcy.yozoraforum.vo.CommentsVO;
 import com.lcy.yozoraforum.vo.ForumCommentsVO;
 import com.lcy.yozoraforum.vo.ForumVo;
 import com.lcy.yozoraforum.wrapper.ForumWrapper;
@@ -39,6 +41,7 @@ public class ForumController {
       forumService.insert(forumDTO);
       return Result.success();
   }
+
 
     /**
      * 分页查询帖子
@@ -78,9 +81,20 @@ public class ForumController {
       //将ForumWrapper对象赋值给ForumVo对象
       BeanUtils.copyProperties(forumWrapper,forumVo);
 
-       = commentsService.showComment(showForumDTO);
+      List<CommentsVO> commentsVOList = commentsService.showComment(showForumDTO);
 
-      return Result.success(forumVo);
+      ForumCommentsVO forumCommentsVO = ForumCommentsVO.builder()
+              .forumId(forumVo.getForumId())
+              .forumTitle(forumVo.getForumTitle())
+              .forumBody(forumVo.getForumBody())
+              .forumLike(forumVo.getForumLike())
+              .createDate(forumVo.getCreateDate())
+              .userId(forumVo.getUserId())
+              .tags(forumVo.getTags())
+              .comments(commentsVOList)
+              .build();
+
+      return Result.success(forumCommentsVO);
    }
 
     /**

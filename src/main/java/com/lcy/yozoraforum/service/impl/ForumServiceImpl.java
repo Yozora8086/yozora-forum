@@ -9,7 +9,9 @@ import com.lcy.yozoraforum.exception.ForumExistLikeException;
 import com.lcy.yozoraforum.mapper.ForumMapper;
 import com.lcy.yozoraforum.mapper.ForumTagRelationMapper;
 import com.lcy.yozoraforum.mapper.TagsMapper;
+import com.lcy.yozoraforum.service.CommentsService;
 import com.lcy.yozoraforum.service.ForumService;
+import com.lcy.yozoraforum.vo.CommentsVO;
 import com.lcy.yozoraforum.vo.ForumVo;
 import com.lcy.yozoraforum.wrapper.ForumWrapper;
 import org.springframework.beans.BeanUtils;
@@ -40,6 +42,8 @@ public class ForumServiceImpl implements ForumService {
     private TagsMapper tagsMapper;
     @Autowired
     private StringRedisTemplate redisTemplate;
+    @Autowired
+    private CommentsService commentsService;
     /**
      * 用户发布论坛帖子
      * @param forumDTO
@@ -161,6 +165,19 @@ public class ForumServiceImpl implements ForumService {
         return result != null && result == 1;
 
     }
+
+
+//    /**
+//     * 获取当前帖子下所有的评论
+//     * @param showForumDTO
+//     * @return
+//     */
+//    public List<CommentsVO> getForumComments(ShowForumDTO showForumDTO){
+//        List<CommentsVO> commentsVOList = commentsService.showComment(showForumDTO);
+//        return commentsVOList;
+//    }
+
+
 
 
 }

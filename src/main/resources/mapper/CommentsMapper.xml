@@ -24,4 +24,11 @@
         </trim>
     </insert>
 
+    <select id="getForumAllComments" resultType="com.lcy.yozoraforum.vo.CommentsVO">
+        select * from comments where forum_id = #{forumId}
+    </select>
+
+<!--    <select id="getForumCommentsAllChilds" resultType="com.lcy.yozoraforum.vo.CommentsVO">-->
+<!--        select * from comments where forum_id = #{forumId} and parent_id = #{parentId}-->
+<!--    </select>-->
 </mapper>
