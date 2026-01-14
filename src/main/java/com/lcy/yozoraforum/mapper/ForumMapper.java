@@ -68,4 +68,13 @@ public interface ForumMapper {
      */
     @Delete("delete from forum where forum_id = #{forumId} and user_id = #{userId}")
     int deleteForum(Long forumId, Long userId);
+
+    /**
+     * 搜索帖子(模糊查询）
+     * @param body
+     * @param offset
+     * @param pageSize
+     * @return
+     */
+    List<Forum> showSearchForum(@Param("body") String body,@Param("offset") int offset,@Param("pageSize") int pageSize);
 }

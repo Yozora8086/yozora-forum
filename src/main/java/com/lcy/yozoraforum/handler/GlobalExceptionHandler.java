@@ -1,6 +1,7 @@
 package com.lcy.yozoraforum.handler;
 
 import com.lcy.yozoraforum.exception.CommentIsNullException;
+import com.lcy.yozoraforum.exception.ForumNotFindException;
 import com.lcy.yozoraforum.util.Result;
 import io.jsonwebtoken.ExpiredJwtException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -30,4 +31,8 @@ public class GlobalExceptionHandler {
         return Result.error("身份已过期，请重新登录");
     }
 
+    @ExceptionHandler(ForumNotFindException.class)
+    public Result handleForumNotFindException(ForumNotFindException ex){
+        return Result.error(ex.getMessage());
+    }
 }

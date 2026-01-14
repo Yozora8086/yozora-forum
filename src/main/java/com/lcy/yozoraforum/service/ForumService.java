@@ -21,7 +21,7 @@ public interface ForumService {
      * @param pageSize
      * @return
      */
-    List<Forum> showForumList(int page, int pageSize);
+    List<ForumWrapper> showForumList(int page, int pageSize);
 
     /**
      * 浏览帖子(进入所选择的帖子)
@@ -35,4 +35,11 @@ public interface ForumService {
      * @param showForumDTO
      */
     boolean like(ShowForumDTO showForumDTO);
+
+    /**
+     * 搜索帖子(模糊查询）
+     * @param body
+     * @return
+     */
+    List<ForumWrapper> searchPost(String body,int page,int pageSize);
 }

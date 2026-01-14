@@ -1,0 +1,25 @@
+package com.lcy.yozoraforum.wrapper;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
+
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+public class CommentsLikeUserRelationWrapper {
+    //评论id
+    private Long commentId;
+    //用户id
+    private Long userId;
+    //点赞状态
+    private Integer status;
+    //时间戳
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime updateTime;
+}

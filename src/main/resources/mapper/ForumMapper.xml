@@ -12,4 +12,13 @@
     <select id="selectForum" resultType="com.lcy.yozoraforum.entity.Forum">
         select * from forum where forum_id = #{forumId}
     </select>
+
+    <select id="showSearchForum" resultType="com.lcy.yozoraforum.entity.Forum">
+        SELECT *
+        FROM forum
+        WHERE forum_title LIKE CONCAT('%', #{body}, '%')
+           OR forum_body  LIKE CONCAT('%', #{body}, '%')
+        ORDER BY create_date DESC
+            LIMIT #{offset}, #{pageSize}
+    </select>
 </mapper>

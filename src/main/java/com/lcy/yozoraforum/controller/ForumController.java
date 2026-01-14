@@ -51,8 +51,8 @@ public class ForumController {
      */
   @GetMapping("/showList")
     public Result<List<ForumVo>> showForumList(@RequestParam int page,@RequestParam int pageSize){
-       List<Forum> forumList = forumService.showForumList(page,pageSize);
-       //stream流操作,把每个 Forum 转成 ForumVo。
+       List<ForumWrapper> forumList = forumService.showForumList(page,pageSize);
+       //stream流操作,把每个ForumWrapper转成 ForumVo。
        List<ForumVo> forumVoList = forumList.stream()
                .map(forum -> {
                    ForumVo forumVo = new ForumVo();
@@ -62,6 +62,7 @@ public class ForumController {
                    forumVo.setForumLike(forum.getForumLike());
                    forumVo.setCreateDate(forum.getCreateDate());
                    forumVo.setUserId(forum.getUserId());
+                   forumVo.setTags(forum.getTags());
                    return forumVo;
                }).collect(Collectors.toList());
 
@@ -80,9 +81,10 @@ public class ForumController {
       ForumVo forumVo = new ForumVo();
       //将ForumWrapper对象赋值给ForumVo对象
       BeanUtils.copyProperties(forumWrapper,forumVo);
-
+      //获取帖子所属评论集合
       List<CommentsVO> commentsVOList = commentsService.showComment(showForumDTO);
 
+      //封装成一个帖子评论一体的对象
       ForumCommentsVO forumCommentsVO = ForumCommentsVO.builder()
               .forumId(forumVo.getForumId())
               .forumTitle(forumVo.getForumTitle())
@@ -94,6 +96,7 @@ public class ForumController {
               .comments(commentsVOList)
               .build();
 
+      //返沪
       return Result.success(forumCommentsVO);
    }
 
@@ -111,6 +114,32 @@ public class ForumController {
       } else {
           return Result.success("取消点赞");
       }
+   }
+
+    /**
+     * 搜索帖子(模糊查询）
+     * @param body
+     * @return
+     */
+   @GetMapping("/search")
+   public Result<List<ForumVo>> searchForum(@RequestParam String body,@RequestParam int page,@RequestParam int pageSize){
+       List<ForumWrapper> forumList = forumService.searchPost(body,page,pageSize);
+       //stream流操作,把每个 ForumWrapper 转成 ForumVo。
+       List<ForumVo> forumVoList = forumList.stream()
+               .map(forum -> {
+                   ForumVo forumVo = new ForumVo();
+                   forumVo.setForumId(forum.getForumId());
+                   forumVo.setForumTitle(forum.getForumTitle());
+                   forumVo.setForumBody(forum.getForumBody());
+                   forumVo.setForumLike(forum.getForumLike());
+                   forumVo.setCreateDate(forum.getCreateDate());
+                   forumVo.setUserId(forum.getUserId());
+                   forumVo.setTags(forum.getTags());
+                   return forumVo;
+               })
+               .collect(Collectors.toList());
+
+       return Result.success(forumVoList);
    }
 
 

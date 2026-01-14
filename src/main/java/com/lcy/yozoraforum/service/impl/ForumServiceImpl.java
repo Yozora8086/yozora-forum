@@ -6,6 +6,7 @@ import com.lcy.yozoraforum.dto.ShowForumDTO;
 import com.lcy.yozoraforum.entity.Forum;
 import com.lcy.yozoraforum.entity.Tags;
 import com.lcy.yozoraforum.exception.ForumExistLikeException;
+import com.lcy.yozoraforum.exception.ForumNotFindException;
 import com.lcy.yozoraforum.mapper.ForumMapper;
 import com.lcy.yozoraforum.mapper.ForumTagRelationMapper;
 import com.lcy.yozoraforum.mapper.TagsMapper;
@@ -28,9 +29,11 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @Service
 public class ForumServiceImpl implements ForumService {
@@ -44,6 +47,7 @@ public class ForumServiceImpl implements ForumService {
     private StringRedisTemplate redisTemplate;
     @Autowired
     private CommentsService commentsService;
+
     /**
      * 用户发布论坛帖子
      * @param forumDTO
@@ -84,12 +88,31 @@ public class ForumServiceImpl implements ForumService {
      */
 
     @Override
-    public List<Forum> showForumList(int page, int pageSize) {
+    public List<ForumWrapper> showForumList(int page, int pageSize) {
         //当前页数起始条
         int offset = (page - 1) * pageSize;
         //执行查询
         List<Forum> forumList = forumMapper.showForumList(offset,pageSize);
-        return forumList;
+        //stream流操作,把每个 Forum 转成 ForumWrapper。
+        List<ForumWrapper> forumWrapperList = forumList.stream()
+                .map(forum -> {
+                    ForumWrapper forumWrapper = new ForumWrapper();
+                    forumWrapper.setForumId(forum.getForumId());
+                    forumWrapper.setForumTitle(forum.getForumTitle());
+                    forumWrapper.setForumBody(forum.getForumBody());
+                    forumWrapper.setForumLike(forum.getForumLike());
+                    forumWrapper.setCreateDate(forum.getCreateDate());
+                    forumWrapper.setUserId(forum.getUserId());
+                    return forumWrapper;
+                })
+                .collect(Collectors.toList());
+        //遍历数据库返回的集合，因为Forum实体类缺少Tags集合
+        for (ForumWrapper forumWrapper : forumWrapperList) {
+            //将查询到tags集合存入ForumWrapper对象中
+            List<Tags> tagsList = forumTagRelationMapper.selectTags(forumWrapper.getForumId());
+            forumWrapper.setTags(tagsList);
+        }
+        return forumWrapperList;
     }
 
     /**
@@ -166,8 +189,46 @@ public class ForumServiceImpl implements ForumService {
 
     }
 
+    /**
+     * 搜索帖子(模糊查询）
+     * @param body
+     * @return
+     */
+    @Override
+    public List<ForumWrapper> searchPost(String body,int page,int pageSize) {
+        //当前页数起始条
+        int offset = (page - 1) * pageSize;
+        List<Forum> forumList = forumMapper.showSearchForum(body,offset,pageSize);
+        //判断是否查询到帖子
+        if (forumList.isEmpty()){
+            throw new ForumNotFindException("没有查询到帖子");
+        }
 
-//    /**
+
+
+        //stream流操作,把每个 Forum 转成 ForumWrapper。
+        List<ForumWrapper> forumWrapperList = forumList.stream()
+                .map(forum -> {
+                    ForumWrapper forumWrapper = new ForumWrapper();
+                    forumWrapper.setForumId(forum.getForumId());
+                    forumWrapper.setForumTitle(forum.getForumTitle());
+                    forumWrapper.setForumBody(forum.getForumBody());
+                    forumWrapper.setForumLike(forum.getForumLike());
+                    forumWrapper.setCreateDate(forum.getCreateDate());
+                    forumWrapper.setUserId(forum.getUserId());
+                    return forumWrapper;
+                })
+                .collect(Collectors.toList());
+        //遍历数据库返回的集合，因为Forum实体类缺少Tags集合
+        for (ForumWrapper forumWrapper : forumWrapperList) {
+            //将查询到tags集合存入ForumWrapper对象中
+            List<Tags> tagsList = forumTagRelationMapper.selectTags(forumWrapper.getForumId());
+            forumWrapper.setTags(tagsList);
+        }
+        return forumWrapperList;
+    }
+
+    //    /**
 //     * 获取当前帖子下所有的评论
 //     * @param showForumDTO
 //     * @return

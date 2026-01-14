@@ -24,9 +24,18 @@ public interface ForumTagRelationMapper {
     List<Tags> selectTags(ShowForumDTO showForumDTO);
 
     /**
+     * 根据帖子id查询当前帖子所添加的分类标签
+     * @param forumId
+     * @return
+     */
+    List<Tags> selectTags(Long forumId);
+
+    /**
      * 删除帖子分类标签关联表 (子表)
      * @param forumId
      */
     @Delete("delete from forum_tag_relation where forum_id = #{forumId}")
     void delete(Long forumId);
+
+
 }

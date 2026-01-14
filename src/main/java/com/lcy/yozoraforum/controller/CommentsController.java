@@ -1,16 +1,15 @@
 package com.lcy.yozoraforum.controller;
 
 import com.lcy.yozoraforum.context.BaseContext;
+import com.lcy.yozoraforum.dto.DeleteCommentDTO;
 import com.lcy.yozoraforum.dto.InsertCommentsDTO;
+import com.lcy.yozoraforum.dto.ShowCommentDTO;
 import com.lcy.yozoraforum.entity.Comments;
 import com.lcy.yozoraforum.service.CommentsService;
 import com.lcy.yozoraforum.util.Result;
 import com.lcy.yozoraforum.vo.InsertCommentVO;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/yozora/comments")
@@ -37,5 +36,30 @@ public class CommentsController {
                 .build();
         return Result.success(insertCommentVO);
 
+    }
+
+    /**
+     * 用户删除评论
+     * @param commentId
+     * @return
+     */
+    @DeleteMapping("/deleteComment/{commentId}")
+    public Result deleteComments(@PathVariable Long commentId){
+        commentsService.deleteComment(commentId);
+        return Result.success("删除成功");
+    }
+
+    /**
+     * 评论点赞/取消点赞
+     */
+    @PostMapping("/like")
+    public Result like(@RequestBody ShowCommentDTO showCommentDTO){
+        boolean flag = commentsService.like(showCommentDTO);
+
+        if (flag == true){
+            return Result.success("成功点赞");
+        } else {
+            return Result.success("取消点赞");
+        }
     }
 }

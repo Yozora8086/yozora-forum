@@ -16,7 +16,7 @@ public interface ForumLikeUserRelationMapper {
      * @param
      * @param
      */
-     void insertRelation(Set<ForumLikeUserRelationWrapper> relationList);
+    void insertRelation(Set<ForumLikeUserRelationWrapper> relationList);
 
     int isExist(@Param("forumId") Long forumId, @Param("userIdList") Set<Long> userIdList);
 

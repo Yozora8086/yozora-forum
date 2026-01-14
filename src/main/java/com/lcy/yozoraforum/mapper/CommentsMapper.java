@@ -3,8 +3,10 @@ package com.lcy.yozoraforum.mapper;
 import com.lcy.yozoraforum.dto.InsertCommentsDTO;
 import com.lcy.yozoraforum.dto.ShowForumDTO;
 import com.lcy.yozoraforum.vo.CommentsVO;
+import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Update;
 
 import java.util.List;
 
@@ -19,10 +21,18 @@ public interface CommentsMapper {
      */
     List<CommentsVO> getForumAllComments(Long forumId);
 
-//    /**
-//     * 获取当前评论下所有的子评论
-//     * @param parentId
-//     * @return
-//     */
-//    List<CommentsVO> getForumCommentsAllChilds(@Param("forumId") Long forumId,@Param("parentId") Long parentId);
+    /**
+     * 用户删除评论
+     * @param commentId
+     */
+    @Delete("delete from comments where comment_id = #{commentId} and user_id = #{userId}")
+    void delete(@Param("commentId") Long commentId,@Param("userId") Long userId);
+
+    /**
+     * 修改评论点赞个数
+     * @param commentId
+     * @param count
+     */
+    @Update("update comments set comment_like = #{count} where comment_id = #{commentId}")
+    void updateLike(Long commentId, Integer count);
 }

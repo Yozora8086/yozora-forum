@@ -30,11 +30,4 @@ local value = cjson.encode({status=status,ts=ts})
 --写入数据
 redis.call("HSET", KEYS[1], ARGV[1], value)
 
--- 设置 TTL（过期时间3天）
---if redis.call("PTTL", KEYS[1]) == -1 then
---    redis.call("PEXPIRE", KEYS[1], tonumber(ARGV[2]) * 1000)
---end
---if redis.call("PTTL", KEYS[2]) == -1 then
---    redis.call("PEXPIRE", KEYS[2], tonumber(ARGV[2]) * 1000)
---end
 return status

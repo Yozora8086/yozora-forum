@@ -1,6 +1,7 @@
 package com.lcy.yozoraforum.service;
 
 import com.lcy.yozoraforum.dto.InsertCommentsDTO;
+import com.lcy.yozoraforum.dto.ShowCommentDTO;
 import com.lcy.yozoraforum.dto.ShowForumDTO;
 import com.lcy.yozoraforum.entity.Comments;
 import com.lcy.yozoraforum.vo.CommentsVO;
@@ -21,4 +22,17 @@ public interface CommentsService {
      * @return
      */
     List<CommentsVO> showComment(ShowForumDTO showForumDTO);
+
+    /**
+     * 用户删除评论
+     * @param commentId
+     */
+    void deleteComment(Long commentId);
+
+    /**
+     * 评论点赞/取消点赞
+     * @param showCommentDTO
+     * @return
+     */
+    boolean like(ShowCommentDTO showCommentDTO);
 }

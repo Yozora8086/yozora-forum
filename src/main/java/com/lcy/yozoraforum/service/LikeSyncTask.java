@@ -1,8 +1,11 @@
 package com.lcy.yozoraforum.service;
 
 import com.alibaba.fastjson.JSONObject;
+import com.lcy.yozoraforum.mapper.CommentsLikeUserRelationMapper;
+import com.lcy.yozoraforum.mapper.CommentsMapper;
 import com.lcy.yozoraforum.mapper.ForumLikeUserRelationMapper;
 import com.lcy.yozoraforum.mapper.ForumMapper;
+import com.lcy.yozoraforum.wrapper.CommentsLikeUserRelationWrapper;
 import com.lcy.yozoraforum.wrapper.ForumLikeUserRelationWrapper;
 import io.lettuce.core.json.JsonObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,9 +35,16 @@ public class LikeSyncTask {
     private ForumMapper forumMapper;
     @Autowired
     private ForumLikeUserRelationMapper forumLikeUserRelationMapper;
+    @Autowired
+    private CommentsLikeUserRelationMapper commentsLikeUserRelationMapper;
+    @Autowired
+    private CommentsMapper commentsMapper;
 
 
-    @Scheduled(fixedDelay = 10000)
+    /**
+     * 帖子点赞模块 计时器
+     */
+    @Scheduled(fixedDelay = 60000)
     @Async("taskExecutor")
     public void syncLikeUser(){
         //扫描帖子点赞的用户数据
@@ -114,7 +124,93 @@ public class LikeSyncTask {
 
     }
 
-    @Scheduled(fixedDelay = 10000)
+
+    /**
+     * 评论点赞模块 计时器
+     */
+    @Scheduled(fixedDelay = 60000)
+    @Async("taskExecutor")
+    public void syncCommentLikeUser(){
+        //扫描评论点赞的用户数据
+        ScanOptions options = ScanOptions.scanOptions()
+                .match("like:comment:*")
+                .count(100)
+                .build();
+
+
+        //发起scan,拿到游标(扫描评论点赞的用户数据)
+        Cursor<byte[]> cursor = redisTemplate.getConnectionFactory()
+                .getConnection()
+                .scan(options);
+
+
+        while (cursor.hasNext()){
+            //将字节转换成字符串(Redis协议底层就是字节,)
+            String key = new String(cursor.next(), StandardCharsets.UTF_8);
+            //判断数据的键是否为空
+            if (key.endsWith(":")){
+                continue;
+            }
+            //删除like:comment:前缀
+            String commentIdStr = key.substring("like:comment:".length());
+
+            Long commentId;
+            try {
+                //类型转换
+                commentId = Long.valueOf(commentIdStr);
+            } catch (NumberFormatException e){
+                continue;
+            }
+
+            //获取该评论点赞用户的集合
+            Map<Object,Object> userIdMap = redisTemplate.opsForHash().entries(key);
+            //用于执行mybatis语句的参数集合
+            Set<CommentsLikeUserRelationWrapper> userIdList = new HashSet<>();
+
+            //遍历该帖子点赞用户的集合
+            for (Map.Entry<Object, Object> entry : userIdMap.entrySet()) {
+                //获取键
+                Long userId = Long.valueOf(entry.getKey().toString().replace("\"", "").trim());
+                //获取值
+                String jsonValue = entry.getValue().toString();
+
+                //获取的值是json数据，进行解析
+                JSONObject object = JSONObject.parseObject(jsonValue);
+                Integer status = object.getInteger("status");
+                Long ts = object.getLong("ts");
+
+                //帖子用户点赞关联wrapper对象赋值
+                CommentsLikeUserRelationWrapper commentsLikeUserRelationWrapper = CommentsLikeUserRelationWrapper.builder()
+                        .commentId(commentId)//被点赞帖子id
+                        .userId(userId)//点赞用户id
+                        .status(status)//点赞状态(0是取消状态/1是点赞状态)
+                        .updateTime(LocalDateTime.ofInstant(
+                                //将毫秒转换成(yyyy-MM-dd HH:mm:ss)
+                                Instant.ofEpochMilli(ts),
+                                //指定时区，系统默认
+                                ZoneId.systemDefault()))
+                        .build();
+                //将对象加入到集合中用于批量写入
+                userIdList.add(commentsLikeUserRelationWrapper);
+            }
+
+
+            try {
+                //写入数据库
+                commentsLikeUserRelationMapper.insertRelation(userIdList);
+            } catch (DuplicateKeyException e) {
+
+            }
+
+        }
+        //关闭游标
+        cursor.close();
+
+    }
+
+
+
+    @Scheduled(fixedDelay = 60000)
     @Async("taskExecutor")
     public void syncLikeCount(){
         //构造scan参数
@@ -152,6 +248,53 @@ public class LikeSyncTask {
 
             //写入数据库
             forumMapper.updateLike(forumId, count);
+
+        }
+        //关闭游标
+        cursor.close();
+
+    }
+
+
+
+    @Scheduled(fixedDelay = 60000)
+    @Async("taskExecutor")
+    public void syncLikeCommentCount(){
+        //构造scan参数
+        ScanOptions options = ScanOptions.scanOptions()
+                .match("like:countComment:*")  //要拿的数据
+                .count(100)  //每次扫描100个
+                .build();
+
+        //发起scan,拿到游标
+        Cursor<byte[]> cursor = redisTemplate.getConnectionFactory()
+                .getConnection()
+                .scan(options);
+
+        //循环遍历游标
+        while (cursor.hasNext()){
+            //将字节转换成字符串(Redis协议底层就是字节,)
+            String key = new String(cursor.next(), StandardCharsets.UTF_8);
+            //判断数据的键是否为空
+            if (key.endsWith(":")){
+                continue;
+            }
+            //删除like:countComment:*前缀
+            String forumIdStr = key.substring("like:countComment:".length());
+            Long commentId;
+            try {
+                //类型转换
+                commentId = Long.valueOf(forumIdStr);
+            } catch (NumberFormatException e){
+                continue;
+            }
+
+            Object countOb = redisTemplate.opsForValue().get(key);
+
+            Integer count = Integer.valueOf(countOb.toString());
+
+            //写入数据库
+            commentsMapper.updateLike(commentId, count);
 
         }
         //关闭游标
