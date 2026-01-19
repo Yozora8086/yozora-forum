@@ -77,4 +77,11 @@ public interface ForumMapper {
      * @return
      */
     List<Forum> showSearchForum(@Param("body") String body,@Param("offset") int offset,@Param("pageSize") int pageSize);
+
+    /**
+     * 根据帖子id查询发布用户
+     * @param forumId
+     * @return
+     */
+    Long selectUserByForum(Long forumId);
 }

@@ -21,4 +21,9 @@
         ORDER BY create_date DESC
             LIMIT #{offset}, #{pageSize}
     </select>
+
+
+    <select id="selectUserByForum" resultType="java.lang.Long">
+        select user_id from forum where forum_id = #{forumId}
+    </select>
 </mapper>

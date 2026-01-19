@@ -5,7 +5,9 @@ import com.lcy.yozoraforum.dto.InsertCommentsDTO;
 import com.lcy.yozoraforum.dto.ShowCommentDTO;
 import com.lcy.yozoraforum.dto.ShowForumDTO;
 import com.lcy.yozoraforum.exception.CommentIsNullException;
+import com.lcy.yozoraforum.handler.NotifyWebSocketHandler;
 import com.lcy.yozoraforum.mapper.CommentsMapper;
+import com.lcy.yozoraforum.mapper.ForumMapper;
 import com.lcy.yozoraforum.service.CommentsService;
 import com.lcy.yozoraforum.vo.CommentsVO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +32,9 @@ public class CommentsServiceImpl implements CommentsService {
     private CommentsMapper commentsMapper;
     @Autowired
     private RedisTemplate redisTemplate;
+    @Autowired
+    private ForumMapper forumMapper;
+
 
     /**
      * 用户发表评论
@@ -50,6 +55,10 @@ public class CommentsServiceImpl implements CommentsService {
                 .createTime(insertCommentsDTO.getCreateTime())
                 .resource(insertCommentsDTO.getResourceId())
                 .build();
+
+        Long userId = forumMapper.selectUserByForum(insertCommentsDTO.getForumId());
+
+        NotifyWebSocketHandler.push(userId,comments.getUserId().toString() + "评论了你");
         return comments;
     }
 
