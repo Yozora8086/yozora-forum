@@ -1,6 +1,7 @@
 package com.lcy.yozoraforum.handler;
 
 import com.lcy.yozoraforum.exception.CommentIsNullException;
+import com.lcy.yozoraforum.exception.CommentNotExistException;
 import com.lcy.yozoraforum.exception.ForumNotFindException;
 import com.lcy.yozoraforum.util.Result;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -31,8 +32,23 @@ public class GlobalExceptionHandler {
         return Result.error("身份已过期，请重新登录");
     }
 
+    /**
+     * 捕获帖子不存在异常
+     * @param ex
+     * @return
+     */
     @ExceptionHandler(ForumNotFindException.class)
     public Result handleForumNotFindException(ForumNotFindException ex){
+        return Result.error(ex.getMessage());
+    }
+
+    /**
+     * 捕获评论不存在异常
+     * @param ex
+     * @return
+     */
+    @ExceptionHandler(CommentNotExistException.class)
+    public Result handleCommentNotExistException(CommentNotExistException ex){
         return Result.error(ex.getMessage());
     }
 }

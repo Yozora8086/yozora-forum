@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.lcy.yozoraforum.mapper.NotificationMapper">
+   <insert id="InsertNotification">
+       insert into notification (user_id,sender_id,type,target,content,link_url,is_read,create_time)
+       values
+           (#{userId},#{senderId},#{type},#{target},#{content},#{linkUrl},#{isRead},now())
+   </insert>
+
+
+    <select id="selectMsg" resultType="com.lcy.yozoraforum.entity.Notification">
+        select * from notification where user_id = #{user_id} order by create_time desc
+    </select>
+</mapper>

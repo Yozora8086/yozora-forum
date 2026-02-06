@@ -1,6 +1,7 @@
 package com.lcy.yozoraforum.service;
 
 import com.alibaba.fastjson.JSONObject;
+import com.lcy.yozoraforum.handler.NotifyWebSocketHandler;
 import com.lcy.yozoraforum.mapper.CommentsLikeUserRelationMapper;
 import com.lcy.yozoraforum.mapper.CommentsMapper;
 import com.lcy.yozoraforum.mapper.ForumLikeUserRelationMapper;
@@ -106,6 +107,8 @@ public class LikeSyncTask {
                                 //指定时区，系统默认
                                 ZoneId.systemDefault()))
                         .build();
+
+
                 //将对象加入到集合中用于批量写入
                 userIdList.add(forumLikeUserRelationWrapper);
             }
@@ -117,6 +120,8 @@ public class LikeSyncTask {
             } catch (DuplicateKeyException e) {
 
             }
+
+
 
         }
         //关闭游标

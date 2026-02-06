@@ -1,13 +1,17 @@
 package com.lcy.yozoraforum.service.impl;
 
+import com.aliyun.oss.OSS;
 import com.lcy.yozoraforum.context.BaseContext;
 import com.lcy.yozoraforum.dto.ForumDTO;
 import com.lcy.yozoraforum.dto.ShowForumDTO;
 import com.lcy.yozoraforum.entity.Forum;
+import com.lcy.yozoraforum.entity.ForumResourceUrl;
 import com.lcy.yozoraforum.entity.Tags;
 import com.lcy.yozoraforum.exception.ForumExistLikeException;
 import com.lcy.yozoraforum.exception.ForumNotFindException;
+import com.lcy.yozoraforum.handler.NotifyWebSocketHandler;
 import com.lcy.yozoraforum.mapper.ForumMapper;
+import com.lcy.yozoraforum.mapper.ForumResourceUrlMapper;
 import com.lcy.yozoraforum.mapper.ForumTagRelationMapper;
 import com.lcy.yozoraforum.mapper.TagsMapper;
 import com.lcy.yozoraforum.service.CommentsService;
@@ -23,6 +27,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.xml.crypto.Data;
 import java.io.IOException;
@@ -32,6 +37,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -47,6 +53,13 @@ public class ForumServiceImpl implements ForumService {
     private StringRedisTemplate redisTemplate;
     @Autowired
     private CommentsService commentsService;
+    @Autowired
+    private ForumResourceUrlMapper forumResourceUrlMapper;
+
+    @Autowired
+    private OSS ossClient;
+
+    private final String bucketName = "yozora-forum";
 
     /**
      * 用户发布论坛帖子
@@ -75,6 +88,35 @@ public class ForumServiceImpl implements ForumService {
         forumMapper.insert(forum);
         Long forumId = forum.getForumId();
         System.out.println(forumId);
+
+        //获取用户上传信息集合
+        List<MultipartFile> resource = forumDTO.getResource();
+
+        //创建url集合
+        List<String> urls = new ArrayList<>();
+
+        //遍历用户上传信息集合
+        for (MultipartFile multipartFile : resource) {
+            //给每个资源生成唯一的uuid
+            UUID uuid = UUID.randomUUID();
+            //uuid+文件名 拼接
+            String fileName = uuid + multipartFile.getOriginalFilename();
+            try {
+                //上传到oss
+                ossClient.putObject(bucketName,fileName,multipartFile.getInputStream());
+            } catch (IOException e) {
+                throw new RuntimeException("OSS文件上传失败");
+            }
+            // 返回访问URL
+            String url = String.format("https://%s.%s/%s", bucketName, "oss-cn-beijing.aliyuncs.com", fileName);
+            // 将url放入urls集合
+            urls.add(url);
+            System.out.println(url);
+        }
+
+
+        //将资源插入资源表
+        forumResourceUrlMapper.inserts(forumId,urls);
 
         //将论坛帖子和分类标签进行绑定到帖子分类标签表
         forumTagRelationMapper.insert(tagsId,forumId);
@@ -124,6 +166,12 @@ public class ForumServiceImpl implements ForumService {
     public ForumWrapper showForum(ShowForumDTO showForumDTO) {
         //根据帖子id查询帖子
         Forum forum = forumMapper.selectForum(showForumDTO);
+        //根据帖子id查询帖子所携带的资源
+        List<String> forumResourceUrlList = forumResourceUrlMapper.select(showForumDTO.getForumId());
+
+        for (String s : forumResourceUrlList) {
+            System.out.println("------------------------------"+s);
+        }
 
         //根据帖子id查询当前帖子所添加的分类标签
         List<Tags> tagsList = forumTagRelationMapper.selectTags(showForumDTO);
@@ -137,6 +185,7 @@ public class ForumServiceImpl implements ForumService {
                 .createDate(forum.getCreateDate())
                 .userId(forum.getUserId())
                 .tags(tagsList)
+                .url(forumResourceUrlList)
                 .build();
 
 
@@ -184,6 +233,7 @@ public class ForumServiceImpl implements ForumService {
         } catch (Exception e) {
             e.printStackTrace();
         }
+
 
         return result != null && result == 1;
 

@@ -1,6 +1,7 @@
 package com.lcy.yozoraforum.controller;
 
 import com.lcy.yozoraforum.context.BaseContext;
+import com.lcy.yozoraforum.dto.CommentPositionDTO;
 import com.lcy.yozoraforum.dto.DeleteCommentDTO;
 import com.lcy.yozoraforum.dto.InsertCommentsDTO;
 import com.lcy.yozoraforum.dto.ShowCommentDTO;
@@ -8,6 +9,7 @@ import com.lcy.yozoraforum.entity.Comments;
 import com.lcy.yozoraforum.service.CommentsService;
 import com.lcy.yozoraforum.util.Result;
 import com.lcy.yozoraforum.vo.InsertCommentVO;
+import com.lcy.yozoraforum.vo.PositionVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -61,5 +63,19 @@ public class CommentsController {
         } else {
             return Result.success("取消点赞");
         }
+    }
+
+    /**
+     * 评论通知跳转前的定位
+     * @param commentPositionDTO
+     * @return
+     */
+    @PostMapping("/positionComment")
+    public Result<PositionVO> positionComment(@RequestBody CommentPositionDTO commentPositionDTO){
+
+        PositionVO positionVO = commentsService.selectPositon(commentPositionDTO);
+
+        return Result.success(positionVO);
+
     }
 }

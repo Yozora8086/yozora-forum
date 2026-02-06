@@ -1,13 +1,16 @@
 package com.lcy.yozoraforum.service.impl;
 
+import com.aliyun.oss.OSS;
 import com.lcy.yozoraforum.context.BaseContext;
 import com.lcy.yozoraforum.dto.UpdateForumDTO;
 import com.lcy.yozoraforum.entity.Forum;
 import com.lcy.yozoraforum.exception.BizException;
 import com.lcy.yozoraforum.mapper.ForumLikeUserRelationMapper;
 import com.lcy.yozoraforum.mapper.ForumMapper;
+import com.lcy.yozoraforum.mapper.ForumResourceUrlMapper;
 import com.lcy.yozoraforum.mapper.ForumTagRelationMapper;
 import com.lcy.yozoraforum.service.UserCenterService;
+import com.lcy.yozoraforum.util.OssUtils;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -25,6 +28,12 @@ public class UserCenterServiceImpl implements UserCenterService {
     private ForumLikeUserRelationMapper forumLikeUserRelationMapper;
     @Autowired
     private ForumTagRelationMapper forumTagRelationMapper;
+    @Autowired
+    private ForumResourceUrlMapper forumResourceUrlMapper;
+    @Autowired
+    private OSS ossClient;
+
+    private static final String BUCKET_NAME = "yozora-forum";
     /**
      * 分页查询我发布的帖子
      * @param page
@@ -61,10 +70,21 @@ public class UserCenterServiceImpl implements UserCenterService {
     @Transactional
     @Override
     public void deleteMineForum(Long forumId) {
+        //查询这个帖子所携带的资源
+        List<String> urls = forumResourceUrlMapper.select(forumId);
         //先删除帖子点赞记录关联表 (子表)
         forumLikeUserRelationMapper.delete(forumId,BaseContext.getCurrentId());
         //再删除帖子分类标签关联表 (子表)
         forumTagRelationMapper.delete(forumId);
+        //删除帖子所携带的资源
+        forumResourceUrlMapper.delete(forumId);
+        //遍历帖子所携带的资源
+        for (String url : urls) {
+            String fileName = OssUtils.extractObjectName(url);
+            //删除上传在oss的资源
+            ossClient.deleteObject(BUCKET_NAME,fileName);
+        }
+
         //删除子表，返回删除结果
         int rows = forumMapper.deleteForum(forumId,BaseContext.getCurrentId());
 

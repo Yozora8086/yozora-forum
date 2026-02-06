@@ -37,7 +37,7 @@ public class ForumController {
      * @return
      */
   @PostMapping("/insertForum")
-    public Result insertForum(@RequestBody ForumDTO forumDTO){
+    public Result insertForum(@ModelAttribute ForumDTO forumDTO){
       forumService.insert(forumDTO);
       return Result.success();
   }
@@ -88,6 +88,7 @@ public class ForumController {
       ForumCommentsVO forumCommentsVO = ForumCommentsVO.builder()
               .forumId(forumVo.getForumId())
               .forumTitle(forumVo.getForumTitle())
+              .url(forumVo.getUrl())
               .forumBody(forumVo.getForumBody())
               .forumLike(forumVo.getForumLike())
               .createDate(forumVo.getCreateDate())

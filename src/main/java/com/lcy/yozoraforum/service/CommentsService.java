@@ -1,10 +1,12 @@
 package com.lcy.yozoraforum.service;
 
+import com.lcy.yozoraforum.dto.CommentPositionDTO;
 import com.lcy.yozoraforum.dto.InsertCommentsDTO;
 import com.lcy.yozoraforum.dto.ShowCommentDTO;
 import com.lcy.yozoraforum.dto.ShowForumDTO;
 import com.lcy.yozoraforum.entity.Comments;
 import com.lcy.yozoraforum.vo.CommentsVO;
+import com.lcy.yozoraforum.vo.PositionVO;
 
 import java.util.List;
 
@@ -35,4 +37,11 @@ public interface CommentsService {
      * @return
      */
     boolean like(ShowCommentDTO showCommentDTO);
+
+    /**
+     * 评论通知跳转前的定位
+     * @param commentPositionDTO
+     * @return
+     */
+    PositionVO selectPositon(CommentPositionDTO commentPositionDTO);
 }

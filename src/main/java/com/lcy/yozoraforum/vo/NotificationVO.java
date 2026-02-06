@@ -1,18 +1,15 @@
-package com.lcy.yozoraforum.entity;
+package com.lcy.yozoraforum.vo;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
-@Builder
-public class Notification {
-    //通知信息id
-    private Long notificationId;
+@NoArgsConstructor
+public class NotificationVO {
     //收到通知用户id
     private Long userId;
     //触发者（发起者，其他用户或者系统）
@@ -29,5 +26,4 @@ public class Notification {
     private boolean isRead;
     //通知创建时间
     private LocalDateTime createTime;
-
 }

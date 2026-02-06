@@ -28,4 +28,12 @@
         select * from comments where forum_id = #{forumId}
     </select>
 
+
+    <select id="selectPosition" resultType="java.lang.Long">
+        SELECT COUNT(*)
+        FROM comments
+        WHERE
+        forum_id = #{forumId} AND (create_time >= #{createTime} and parent_id = #{parentId});
+    </select>
+
 </mapper>

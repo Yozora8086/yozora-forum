@@ -19,6 +19,8 @@ public class ForumCommentsVO {
     private Long forumId;
     //论坛帖子标题
     private String forumTitle;
+    //帖子的资源
+    private List<String> url;
     //论坛帖子内容
     private String forumBody;
     //论坛帖子获得的赞

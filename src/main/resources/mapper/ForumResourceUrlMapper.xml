@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.lcy.yozoraforum.mapper.ForumResourceUrlMapper">
+   <insert id="inserts" parameterType="list">
+      insert into forum_resource_url (forum_id,resource_url) values
+      <foreach collection="urls" item="item" separator=",">
+         (#{forumId},#{item})
+      </foreach>
+   </insert>
+
+    <select id="select" resultType="java.lang.String">
+      select resource_url from forum_resource_url where forum_id = #{forumId}
+   </select>
+
+    <delete id="delete">
+        delete from forum_resource_url where forum_id = #{forumId}
+    </delete>
+</mapper>

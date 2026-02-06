@@ -1,5 +1,6 @@
 package com.lcy.yozoraforum.mapper;
 
+import com.lcy.yozoraforum.dto.CommentPositionDTO;
 import com.lcy.yozoraforum.dto.InsertCommentsDTO;
 import com.lcy.yozoraforum.dto.ShowForumDTO;
 import com.lcy.yozoraforum.vo.CommentsVO;
@@ -35,4 +36,11 @@ public interface CommentsMapper {
      */
     @Update("update comments set comment_like = #{count} where comment_id = #{commentId}")
     void updateLike(Long commentId, Integer count);
+
+    /**
+     * 评论通知跳转前的定位
+     * @param commentPositionDTO
+     * @return
+     */
+    Long selectPosition(CommentPositionDTO commentPositionDTO);
 }

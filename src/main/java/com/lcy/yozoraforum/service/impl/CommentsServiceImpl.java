@@ -1,15 +1,22 @@
 package com.lcy.yozoraforum.service.impl;
 
 import com.lcy.yozoraforum.context.BaseContext;
+import com.lcy.yozoraforum.dto.CommentPositionDTO;
 import com.lcy.yozoraforum.dto.InsertCommentsDTO;
 import com.lcy.yozoraforum.dto.ShowCommentDTO;
 import com.lcy.yozoraforum.dto.ShowForumDTO;
+import com.lcy.yozoraforum.entity.Notification;
 import com.lcy.yozoraforum.exception.CommentIsNullException;
+import com.lcy.yozoraforum.exception.CommentNotExistException;
 import com.lcy.yozoraforum.handler.NotifyWebSocketHandler;
 import com.lcy.yozoraforum.mapper.CommentsMapper;
 import com.lcy.yozoraforum.mapper.ForumMapper;
+import com.lcy.yozoraforum.mapper.NotificationMapper;
 import com.lcy.yozoraforum.service.CommentsService;
+import com.lcy.yozoraforum.util.CalculatePosition;
+import com.lcy.yozoraforum.util.NotificationPush;
 import com.lcy.yozoraforum.vo.CommentsVO;
+import com.lcy.yozoraforum.vo.PositionVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -34,6 +41,8 @@ public class CommentsServiceImpl implements CommentsService {
     private RedisTemplate redisTemplate;
     @Autowired
     private ForumMapper forumMapper;
+    @Autowired
+    private NotificationMapper notificationMapper;
 
 
     /**
@@ -56,9 +65,16 @@ public class CommentsServiceImpl implements CommentsService {
                 .resource(insertCommentsDTO.getResourceId())
                 .build();
 
+        //获取帖子发布者的id
         Long userId = forumMapper.selectUserByForum(insertCommentsDTO.getForumId());
 
-        NotifyWebSocketHandler.push(userId,comments.getUserId().toString() + "评论了你");
+        //通知插入数据库前的包装
+        Notification notification = NotificationPush.Add(userId, 1, 1, comments.getContent(),"");
+
+        //插入数据库
+        notificationMapper.InsertNotification(notification);
+        //WebSocket 推送通知
+        NotifyWebSocketHandler.push(userId,comments.getUserId().toString() + "评论了你:" + comments.getContent());
         return comments;
     }
 
@@ -149,4 +165,28 @@ public class CommentsServiceImpl implements CommentsService {
 
         return result != null && result == 1;
     }
+
+    // TODO
+    /**
+     * 评论通知跳转前的定位
+     * @param commentPositionDTO
+     * @return
+     */
+    @Override
+    public PositionVO selectPositon(CommentPositionDTO commentPositionDTO) {
+        //获取评论是第几条
+        Long position = commentsMapper.selectPosition(commentPositionDTO);
+
+        if (position == 0){
+            throw new CommentNotExistException("当前评论不存在");
+        }
+
+        //计算页数
+        PositionVO positionVO =  CalculatePosition.Calculate(position);
+
+        return positionVO;
+
+    }
+
+
 }
