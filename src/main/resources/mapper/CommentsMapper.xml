@@ -25,7 +25,7 @@
     </insert>
 
     <select id="getForumAllComments" resultType="com.lcy.yozoraforum.vo.CommentsVO">
-        select * from comments where forum_id = #{forumId}
+        select * from comments where forum_id = #{forumId} and sender_user_id is null and parent_id = 0 order by create_time desc limit #{offset},#{pageSize}
     </select>
 
 
@@ -34,6 +34,21 @@
         FROM comments
         WHERE
         forum_id = #{forumId} AND (create_time >= #{createTime} and parent_id = #{parentId});
+    </select>
+
+    <select id="selectAll" resultType="java.lang.Long">
+        select count(*) from comments where forum_id = #{forumId}
+    </select>
+
+    <select id="selectNoChildCommentCount" resultType="java.lang.Long">
+        select count(*) from comments where forum_id = #{forumId} and parent_id = 0
+    </select>
+
+    <select id="getChildComments" resultType="com.lcy.yozoraforum.vo.CommentsVO">
+        select * from comments where
+        <foreach item="id" index="index" collection="commentsVOList" open="(" separator="or" close=")">
+            parent_id = #{id.commentId}
+        </foreach>
     </select>
 
 </mapper>

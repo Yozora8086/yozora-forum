@@ -5,6 +5,7 @@ import com.lcy.yozoraforum.dto.InsertCommentsDTO;
 import com.lcy.yozoraforum.dto.ShowCommentDTO;
 import com.lcy.yozoraforum.dto.ShowForumDTO;
 import com.lcy.yozoraforum.entity.Comments;
+import com.lcy.yozoraforum.vo.CommentCountVO;
 import com.lcy.yozoraforum.vo.CommentsVO;
 import com.lcy.yozoraforum.vo.PositionVO;
 
@@ -19,11 +20,11 @@ public interface CommentsService {
     Comments insertComment(InsertCommentsDTO insertCommentsDTO);
 
     /**
-     * 显示评论列表
-     * @param showForumDTO
+     * 分页查询该帖子的顶级评论
+     * @param forumId
      * @return
      */
-    List<CommentsVO> showComment(ShowForumDTO showForumDTO);
+    List<CommentsVO> showComment(Long forumId,int page,int pageSize);
 
     /**
      * 用户删除评论
@@ -44,4 +45,11 @@ public interface CommentsService {
      * @return
      */
     PositionVO selectPositon(CommentPositionDTO commentPositionDTO);
+
+    /**
+     * 统计当前帖子下全部的评论
+     * @param forumId
+     * @return
+     */
+    CommentCountVO selectAllComments(Long forumId);
 }

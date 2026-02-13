@@ -27,6 +27,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.xml.crypto.Data;
@@ -66,6 +67,7 @@ public class ForumServiceImpl implements ForumService {
      * @param forumDTO
      */
     @Override
+    @Transactional
     public void insert(ForumDTO forumDTO) {
         Forum forum = new Forum();
 
@@ -145,9 +147,12 @@ public class ForumServiceImpl implements ForumService {
                     forumWrapper.setForumLike(forum.getForumLike());
                     forumWrapper.setCreateDate(forum.getCreateDate());
                     forumWrapper.setUserId(forum.getUserId());
+                    forumWrapper.setForumCommentCount(forum.getForumCommentCount());
+                    forumWrapper.setForumPV(forum.getForumPV());
                     return forumWrapper;
                 })
                 .collect(Collectors.toList());
+
         //遍历数据库返回的集合，因为Forum实体类缺少Tags集合
         for (ForumWrapper forumWrapper : forumWrapperList) {
             //将查询到tags集合存入ForumWrapper对象中
@@ -158,23 +163,39 @@ public class ForumServiceImpl implements ForumService {
     }
 
     /**
-     * 浏览帖子(进入所选择的帖子)
-     * @param showForumDTO
+     * 获取帖子表里的帖子总数量
      * @return
      */
     @Override
-    public ForumWrapper showForum(ShowForumDTO showForumDTO) {
+    public Long selectAllForum() {
+        //获取帖子表里的帖子总数量
+        Long forumCount = forumMapper.selectAll();
+        return forumCount;
+    }
+
+    /**
+     * 浏览帖子(进入所选择的帖子)
+     * @param forumId
+     * @return
+     */
+    @Override
+    @Transactional
+    public ForumWrapper showForum(Long forumId) {
         //根据帖子id查询帖子
-        Forum forum = forumMapper.selectForum(showForumDTO);
+        Forum forum = forumMapper.selectForum(forumId);
         //根据帖子id查询帖子所携带的资源
-        List<String> forumResourceUrlList = forumResourceUrlMapper.select(showForumDTO.getForumId());
+        List<String> forumResourceUrlList = forumResourceUrlMapper.select(forumId);
+
+        //帖子浏览量自增
+        forumMapper.updatePV(forumId);
+
 
         for (String s : forumResourceUrlList) {
             System.out.println("------------------------------"+s);
         }
 
         //根据帖子id查询当前帖子所添加的分类标签
-        List<Tags> tagsList = forumTagRelationMapper.selectTags(showForumDTO);
+        List<Tags> tagsList = forumTagRelationMapper.selectTags(forumId);
 
         //将Forum对象赋值给ForumWrapper对象
         ForumWrapper forumWrapper = ForumWrapper.builder()
@@ -186,6 +207,8 @@ public class ForumServiceImpl implements ForumService {
                 .userId(forum.getUserId())
                 .tags(tagsList)
                 .url(forumResourceUrlList)
+                .forumPV(forum.getForumPV())
+
                 .build();
 
 

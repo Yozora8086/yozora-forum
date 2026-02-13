@@ -14,7 +14,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class ForumCommentsVO {
+public class ForumMsgVO {
     //论坛帖子id
     private Long forumId;
     //论坛帖子标题
@@ -32,6 +32,11 @@ public class ForumCommentsVO {
     private Long userId;
     //论坛帖子的分类标签
     List<Tags> tags;
-    //帖子评论
-    List<CommentsVO> comments;
+    //数据库帖子总数
+    private Long forumCount;
+    //当前帖子的评论数
+    private Long forumCommentCount;
+    //当前帖子的浏览量
+    private Long forumPV;
+
 }

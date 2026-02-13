@@ -8,10 +8,14 @@ import com.lcy.yozoraforum.dto.ShowCommentDTO;
 import com.lcy.yozoraforum.entity.Comments;
 import com.lcy.yozoraforum.service.CommentsService;
 import com.lcy.yozoraforum.util.Result;
+import com.lcy.yozoraforum.vo.CommentCountVO;
+import com.lcy.yozoraforum.vo.CommentsVO;
 import com.lcy.yozoraforum.vo.InsertCommentVO;
 import com.lcy.yozoraforum.vo.PositionVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/yozora/comments")
@@ -38,6 +42,30 @@ public class CommentsController {
                 .build();
         return Result.success(insertCommentVO);
 
+    }
+
+    /**
+     * 分页查询该帖子的顶级评论
+     * @param forumId
+     * @param page
+     * @param pageSize
+     * @return
+     */
+    @GetMapping("/showCommentsList")
+    public Result<List<CommentsVO>> showCommentsList(Long forumId, int page, int pageSize){
+        List<CommentsVO> commentsVOList = commentsService.showComment(forumId,page,pageSize);
+        return Result.success(commentsVOList);
+    }
+
+    /**
+     * 统计当前帖子下全部的评论
+     * @param forumId
+     * @return
+     */
+    @GetMapping("/getAllComment")
+    public Result<CommentCountVO> selectAllComment(@RequestParam Long forumId){
+        CommentCountVO commentCountVO = commentsService.selectAllComments(forumId);
+        return Result.success(commentCountVO);
     }
 
     /**

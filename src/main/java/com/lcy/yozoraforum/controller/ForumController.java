@@ -2,21 +2,16 @@ package com.lcy.yozoraforum.controller;
 
 import com.lcy.yozoraforum.dto.ForumDTO;
 import com.lcy.yozoraforum.dto.ShowForumDTO;
-import com.lcy.yozoraforum.entity.Forum;
-import com.lcy.yozoraforum.entity.Comments;
 import com.lcy.yozoraforum.service.CommentsService;
 import com.lcy.yozoraforum.service.ForumService;
-import com.lcy.yozoraforum.service.impl.ForumServiceImpl;
 import com.lcy.yozoraforum.util.Result;
-import com.lcy.yozoraforum.vo.CommentsVO;
-import com.lcy.yozoraforum.vo.ForumCommentsVO;
+import com.lcy.yozoraforum.vo.ForumMsgVO;
 import com.lcy.yozoraforum.vo.ForumVo;
 import com.lcy.yozoraforum.wrapper.ForumWrapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -63,6 +58,8 @@ public class ForumController {
                    forumVo.setCreateDate(forum.getCreateDate());
                    forumVo.setUserId(forum.getUserId());
                    forumVo.setTags(forum.getTags());
+                   forumVo.setForumPV(forum.getForumPV());
+                   forumVo.setForumCommentCount(forum.getForumCommentCount());
                    return forumVo;
                }).collect(Collectors.toList());
 
@@ -70,22 +67,30 @@ public class ForumController {
   }
 
     /**
+     * 获取帖子表里的帖子总数量
+     * @return
+     */
+  @GetMapping("/getAllForum")
+  public Result<Long> selectAllForum(){
+      Long forumCount = forumService.selectAllForum();
+      return Result.success(forumCount);
+  }
+
+    /**
      * 浏览帖子(进入所选择的帖子)
-     * @param showForumDTO 是分页查询每个帖子对象所携带的帖子id
+     * @param forumId 是分页查询每个帖子对象所携带的帖子id
      * @return
      */
   @GetMapping("/showForum")
-   public Result<ForumCommentsVO> showForum(@RequestBody ShowForumDTO showForumDTO){
-      ForumWrapper forumWrapper = forumService.showForum(showForumDTO);
+   public Result<ForumMsgVO> showForum(@RequestParam Long forumId){
+      ForumWrapper forumWrapper = forumService.showForum(forumId);
 
       ForumVo forumVo = new ForumVo();
       //将ForumWrapper对象赋值给ForumVo对象
       BeanUtils.copyProperties(forumWrapper,forumVo);
-      //获取帖子所属评论集合
-      List<CommentsVO> commentsVOList = commentsService.showComment(showForumDTO);
 
       //封装成一个帖子评论一体的对象
-      ForumCommentsVO forumCommentsVO = ForumCommentsVO.builder()
+      ForumMsgVO forumMsgVO = ForumMsgVO.builder()
               .forumId(forumVo.getForumId())
               .forumTitle(forumVo.getForumTitle())
               .url(forumVo.getUrl())
@@ -94,11 +99,11 @@ public class ForumController {
               .createDate(forumVo.getCreateDate())
               .userId(forumVo.getUserId())
               .tags(forumVo.getTags())
-              .comments(commentsVOList)
+              .forumPV(forumVo.getForumPV())
               .build();
 
       //返沪
-      return Result.success(forumCommentsVO);
+      return Result.success(forumMsgVO);
    }
 
     /**

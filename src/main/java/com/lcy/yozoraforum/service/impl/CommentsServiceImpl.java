@@ -15,6 +15,7 @@ import com.lcy.yozoraforum.mapper.NotificationMapper;
 import com.lcy.yozoraforum.service.CommentsService;
 import com.lcy.yozoraforum.util.CalculatePosition;
 import com.lcy.yozoraforum.util.NotificationPush;
+import com.lcy.yozoraforum.vo.CommentCountVO;
 import com.lcy.yozoraforum.vo.CommentsVO;
 import com.lcy.yozoraforum.vo.PositionVO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -79,35 +80,75 @@ public class CommentsServiceImpl implements CommentsService {
     }
 
     /**
-     * 获取当前帖子下的所有评论及子评论
-     * @param showForumDTO
+     * 分页查询该帖子的顶级评论
+     * @param forumId
      * @return
      */
     @Override
-    public List<CommentsVO> showComment(ShowForumDTO showForumDTO) {
-        List<CommentsVO> commentsVOList = commentsMapper.getForumAllComments(showForumDTO.getForumId());
-
-        //建立 commentId -> CommentsVO 的索引表
-        Map<Long, CommentsVO> map = commentsVOList.stream()
-                .collect(Collectors.toMap(CommentsVO::getCommentId, c -> c));
-
-        //组装树
-        List<CommentsVO> tree = new ArrayList<>();
+    public List<CommentsVO> showComment(Long forumId,int page,int pageSize) {
+        //当前页数起始条
+        int offset = (page - 1) * pageSize;
+        //分页查询10条父评论
+        List<CommentsVO> commentsVOList = commentsMapper.getForumAllComments(forumId,offset,pageSize);
+        for (CommentsVO commentsVO : commentsVOList) {
+            System.out.println(commentsVO);
+        }
+        //查询返回父评论所携带的子评论
+        List<CommentsVO> commentsChildList = commentsMapper.getChildComments(commentsVOList);
+        System.out.println("子评论-------------------------------" + commentsChildList);
 
         for (CommentsVO commentsVO : commentsVOList) {
-            if (commentsVO.getParentId() == 0L) {
-                // 顶级评论
-                tree.add(commentsVO);
-            } else {
-                // 子评论，挂到父评论下
-                CommentsVO parent = map.get(commentsVO.getParentId());
-                if (parent != null) {
-                    parent.getComments().add(commentsVO);
+            List<CommentsVO> commentsVOS = new ArrayList<>();
+            for (CommentsVO vo : commentsChildList) {
+                if (commentsVO.getCommentId().equals(vo.getParentId())) {
+                    commentsVOS.add(vo);
                 }
             }
+            commentsVO.setComments(commentsVOS);
         }
 
-        return tree;
+        //建立 commentId -> CommentsVO 的索引表
+//        Map<Long, CommentsVO> map = commentsVOList.stream()
+//                .collect(Collectors.toMap(CommentsVO::getCommentId, c -> c));
+//
+//        //组装树
+//        List<CommentsVO> tree = new ArrayList<>();
+//
+//        for (CommentsVO commentsVO : commentsVOList) {
+//            if (commentsVO.getParentId() == 0L) {
+//                // 顶级评论
+//                tree.add(commentsVO);
+//            } else {
+//                // 子评论，挂到父评论下
+//                CommentsVO parent = map.get(commentsVO.getParentId());
+//                if (parent != null) {
+//                    parent.getComments().add(commentsVO);
+//                }
+//            }
+//        }
+
+        return commentsVOList;
+    }
+
+    /**
+     * 统计当前帖子下全部的评论
+     * @param forumId
+     * @return
+     */
+    @Override
+    public CommentCountVO selectAllComments(Long forumId) {
+        //创建commentCountVO对象
+        CommentCountVO commentCountVO = new CommentCountVO();
+        //查询该帖子下的所有评论
+        Long commentCount = commentsMapper.selectAll(forumId);
+        //查询该帖子下的所有父评论
+        Long commentNoChildCount = commentsMapper.selectNoChildCommentCount(forumId);
+
+        //装载至对象
+        commentCountVO.setCommentCount(commentCount);
+        commentCountVO.setNoChildCommentCount(commentNoChildCount);
+
+        return commentCountVO;
     }
 
     /**

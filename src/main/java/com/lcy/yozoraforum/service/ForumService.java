@@ -25,10 +25,10 @@ public interface ForumService {
 
     /**
      * 浏览帖子(进入所选择的帖子)
-     * @param showForumDTO
+     * @param forumId
      * @return
      */
-    ForumWrapper showForum(ShowForumDTO showForumDTO);
+    ForumWrapper showForum(Long forumId);
 
     /**
      * 帖子点赞/取消点赞
@@ -42,4 +42,10 @@ public interface ForumService {
      * @return
      */
     List<ForumWrapper> searchPost(String body,int page,int pageSize);
+
+    /**
+     * 获取数据库帖子总数
+     * @return
+     */
+    Long selectAllForum();
 }

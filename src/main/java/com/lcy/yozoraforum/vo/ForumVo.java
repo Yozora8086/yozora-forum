@@ -32,4 +32,10 @@ public class ForumVo {
     private Long userId;
     //论坛帖子的分类标签
     List<Tags> tags;
+    //数据库帖子总数
+//    private Long forumCount;
+    //当前帖子的评论数
+    private Long forumCommentCount;
+    //帖子浏览数
+    private Long forumPV;
 }

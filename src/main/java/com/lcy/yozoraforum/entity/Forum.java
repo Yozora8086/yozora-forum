@@ -27,6 +27,10 @@ public class Forum {
     private LocalDateTime updateDate;
     //论坛帖子发布用户id
     private Long userId;
+    //当前帖子的评论数
+    private Long forumCommentCount;
+    //帖子浏览数
+    private Long forumPV;
 
 
 

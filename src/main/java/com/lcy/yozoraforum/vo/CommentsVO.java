@@ -28,4 +28,6 @@ public class CommentsVO {
     private int commentLike;
     // 子评论列表
     private List<CommentsVO> comments = new ArrayList<>();
+    //被评论用户id
+    private Long senderUserId;
 }

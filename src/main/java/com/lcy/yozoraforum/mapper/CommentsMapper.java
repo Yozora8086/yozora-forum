@@ -16,11 +16,11 @@ public interface CommentsMapper {
     void insert(@Param("insertCommentsDTO") InsertCommentsDTO insertCommentsDTO,@Param("userId") Long userId);
 
     /**
-     * 获取当前帖子下的所有评论
+     * 分页查询该帖子下的顶级评论
      * @param forumId
      * @return
      */
-    List<CommentsVO> getForumAllComments(Long forumId);
+    List<CommentsVO> getForumAllComments(@Param("forumId") Long forumId,@Param("offset") int offset,@Param("pageSize") int pageSize);
 
     /**
      * 用户删除评论
@@ -43,4 +43,25 @@ public interface CommentsMapper {
      * @return
      */
     Long selectPosition(CommentPositionDTO commentPositionDTO);
+
+    /**
+     * 统计当前帖子下全部的评论
+     * @param forumId
+     * @return
+     */
+    Long selectAll(Long forumId);
+
+    /**
+     * 统计当前帖子下全部的评论(仅父评论)
+     * @param forumId
+     * @return
+     */
+    Long selectNoChildCommentCount(Long forumId);
+
+    /**
+     * 分页查询该帖子下的子评论
+     * @param commentsVOList
+     * @return
+     */
+    List<CommentsVO> getChildComments(List<CommentsVO> commentsVOList);
 }

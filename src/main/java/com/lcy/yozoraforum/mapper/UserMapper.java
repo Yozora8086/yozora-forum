@@ -1,9 +1,11 @@
 package com.lcy.yozoraforum.mapper;
 
 import com.lcy.yozoraforum.dto.UserDTO;
+import com.lcy.yozoraforum.dto.UserUpdateMsgDTO;
 import com.lcy.yozoraforum.entity.User;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
 @Mapper
@@ -33,4 +35,18 @@ public interface UserMapper {
      */
     @Select("select count(*) from user where user_name = #{userName} or user_email = #{userEmail}")
     int isExist(String userName, String userEmail);
+
+    /**
+     * 判断该用户名是否已经被使用(用户修改个人信息时判断)
+     * @param userName
+     * @return
+     */
+    @Select("select count(*) from user where user_name = #{userName} or user_email = #{userEmail}")
+    int isExistUserName(String userName);
+
+    /**
+     * 用户修改个人信息
+     * @param updateMsgDTO
+     */
+    void update(@Param("updateMsgDTO") UserUpdateMsgDTO updateMsgDTO, @Param("userId") Long userId);
 }

@@ -30,10 +30,10 @@ public interface ForumMapper {
 
     /**
      * 浏览帖子(进入所选择的帖子)
-     * @param showForumDTO
+     * @param forumId
      * @return
      */
-    Forum selectForum(ShowForumDTO showForumDTO);
+    Forum selectForum(Long forumId);
 
     /**
      * 点赞增量
@@ -84,4 +84,18 @@ public interface ForumMapper {
      * @return
      */
     Long selectUserByForum(Long forumId);
+
+    /**
+     * 获取帖子表里的帖子总数量
+     * @return
+     */
+    @Select("select count(*) from forum")
+    Long selectAll();
+
+    /**
+     * 帖子浏览量自增
+     * @param forumId
+     */
+    @Update("update forum set forum_pv = forum_pv + 1 where forum_id = #{forumId}")
+    void updatePV(Long forumId);
 }
