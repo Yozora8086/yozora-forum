@@ -38,4 +38,6 @@ public class ForumVo {
     private Long forumCommentCount;
     //帖子浏览数
     private Long forumPV;
+    //帖子发布者用户名
+    private String userName;
 }

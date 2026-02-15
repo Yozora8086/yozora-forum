@@ -60,6 +60,7 @@ public class ForumController {
                    forumVo.setTags(forum.getTags());
                    forumVo.setForumPV(forum.getForumPV());
                    forumVo.setForumCommentCount(forum.getForumCommentCount());
+                   forumVo.setUserName(forum.getUserName());
                    return forumVo;
                }).collect(Collectors.toList());
 
@@ -100,6 +101,7 @@ public class ForumController {
               .userId(forumVo.getUserId())
               .tags(forumVo.getTags())
               .forumPV(forumVo.getForumPV())
+              .userName(forumVo.getUserName())
               .build();
 
       //返沪

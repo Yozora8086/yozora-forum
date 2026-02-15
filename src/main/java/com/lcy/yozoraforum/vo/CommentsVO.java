@@ -30,4 +30,6 @@ public class CommentsVO {
     private List<CommentsVO> comments = new ArrayList<>();
     //被评论用户id
     private Long senderUserId;
+    //评论发布者用户名
+    private String userName;
 }

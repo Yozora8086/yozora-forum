@@ -38,5 +38,7 @@ public class ForumMsgVO {
     private Long forumCommentCount;
     //当前帖子的浏览量
     private Long forumPV;
+    //帖子发布者用户名
+    private String userName;
 
 }

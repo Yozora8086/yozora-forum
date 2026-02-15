@@ -3,6 +3,7 @@ package com.lcy.yozoraforum.mapper;
 import com.lcy.yozoraforum.dto.ShowForumDTO;
 import com.lcy.yozoraforum.dto.UpdateForumDTO;
 import com.lcy.yozoraforum.entity.Forum;
+import com.lcy.yozoraforum.wrapper.ForumWrapper;
 import org.apache.ibatis.annotations.*;
 
 import java.util.List;
@@ -25,7 +26,7 @@ public interface ForumMapper {
      * @param pageSize
      * @return
      */
-    List<Forum> showForumList(@Param("offset") int offset,@Param("pageSize") int pageSize);
+    List<ForumWrapper> showForumList(@Param("offset") int offset,@Param("pageSize") int pageSize);
 
 
     /**
@@ -33,7 +34,7 @@ public interface ForumMapper {
      * @param forumId
      * @return
      */
-    Forum selectForum(Long forumId);
+    ForumWrapper selectForum(Long forumId);
 
     /**
      * 点赞增量

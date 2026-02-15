@@ -136,30 +136,30 @@ public class ForumServiceImpl implements ForumService {
         //当前页数起始条
         int offset = (page - 1) * pageSize;
         //执行查询
-        List<Forum> forumList = forumMapper.showForumList(offset,pageSize);
+        List<ForumWrapper> forumWrappersList = forumMapper.showForumList(offset,pageSize);
         //stream流操作,把每个 Forum 转成 ForumWrapper。
-        List<ForumWrapper> forumWrapperList = forumList.stream()
-                .map(forum -> {
-                    ForumWrapper forumWrapper = new ForumWrapper();
-                    forumWrapper.setForumId(forum.getForumId());
-                    forumWrapper.setForumTitle(forum.getForumTitle());
-                    forumWrapper.setForumBody(forum.getForumBody());
-                    forumWrapper.setForumLike(forum.getForumLike());
-                    forumWrapper.setCreateDate(forum.getCreateDate());
-                    forumWrapper.setUserId(forum.getUserId());
-                    forumWrapper.setForumCommentCount(forum.getForumCommentCount());
-                    forumWrapper.setForumPV(forum.getForumPV());
-                    return forumWrapper;
-                })
-                .collect(Collectors.toList());
+//        List<ForumWrapper> forumWrapperList = forumList.stream()
+//                .map(forum -> {
+//                    ForumWrapper forumWrapper = new ForumWrapper();
+//                    forumWrapper.setForumId(forum.getForumId());
+//                    forumWrapper.setForumTitle(forum.getForumTitle());
+//                    forumWrapper.setForumBody(forum.getForumBody());
+//                    forumWrapper.setForumLike(forum.getForumLike());
+//                    forumWrapper.setCreateDate(forum.getCreateDate());
+//                    forumWrapper.setUserId(forum.getUserId());
+//                    forumWrapper.setForumCommentCount(forum.getForumCommentCount());
+//                    forumWrapper.setForumPV(forum.getForumPV());
+//                    return forumWrapper;
+//                })
+//                .collect(Collectors.toList());
 
         //遍历数据库返回的集合，因为Forum实体类缺少Tags集合
-        for (ForumWrapper forumWrapper : forumWrapperList) {
+        for (ForumWrapper forumWrapper : forumWrappersList) {
             //将查询到tags集合存入ForumWrapper对象中
             List<Tags> tagsList = forumTagRelationMapper.selectTags(forumWrapper.getForumId());
             forumWrapper.setTags(tagsList);
         }
-        return forumWrapperList;
+        return forumWrappersList;
     }
 
     /**
@@ -182,7 +182,7 @@ public class ForumServiceImpl implements ForumService {
     @Transactional
     public ForumWrapper showForum(Long forumId) {
         //根据帖子id查询帖子
-        Forum forum = forumMapper.selectForum(forumId);
+        ForumWrapper forumWrapper = forumMapper.selectForum(forumId);
         //根据帖子id查询帖子所携带的资源
         List<String> forumResourceUrlList = forumResourceUrlMapper.select(forumId);
 
@@ -197,19 +197,24 @@ public class ForumServiceImpl implements ForumService {
         //根据帖子id查询当前帖子所添加的分类标签
         List<Tags> tagsList = forumTagRelationMapper.selectTags(forumId);
 
-        //将Forum对象赋值给ForumWrapper对象
-        ForumWrapper forumWrapper = ForumWrapper.builder()
-                .forumId(forum.getForumId())
-                .forumTitle(forum.getForumTitle())
-                .forumBody(forum.getForumBody())
-                .forumLike(forum.getForumLike())
-                .createDate(forum.getCreateDate())
-                .userId(forum.getUserId())
-                .tags(tagsList)
-                .url(forumResourceUrlList)
-                .forumPV(forum.getForumPV())
+        //将帖子标签挂载到帖子对象中
+        forumWrapper.setTags(tagsList);
+        //将帖子资源挂载到帖子对象中
+        forumWrapper.setUrl(forumResourceUrlList);
 
-                .build();
+        //将Forum对象赋值给ForumWrapper对象
+//        ForumWrapper forumWrapper = ForumWrapper.builder()
+//                .forumId(forum.getForumId())
+//                .forumTitle(forum.getForumTitle())
+//                .forumBody(forum.getForumBody())
+//                .forumLike(forum.getForumLike())
+//                .createDate(forum.getCreateDate())
+//                .userId(forum.getUserId())
+//                .tags(tagsList)
+//                .url(forumResourceUrlList)
+//                .forumPV(forum.getForumPV())
+//
+//                .build();
 
 
         return forumWrapper;
