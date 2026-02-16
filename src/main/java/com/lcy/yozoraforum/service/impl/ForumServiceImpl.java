@@ -96,7 +96,10 @@ public class ForumServiceImpl implements ForumService {
 
         //创建url集合
         List<String> urls = new ArrayList<>();
-
+        //当没有资源上传时直接返回
+        if (urls.isEmpty()){
+            return;
+        }
         //遍历用户上传信息集合
         for (MultipartFile multipartFile : resource) {
             //给每个资源生成唯一的uuid

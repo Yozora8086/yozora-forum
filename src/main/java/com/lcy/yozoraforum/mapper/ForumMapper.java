@@ -14,9 +14,9 @@ public interface ForumMapper {
      * 插入用户发布的论坛帖子
      * @param forum
      */
-    @Insert("insert into forum (forum_title,forum_body,forum_like,create_date,update_date,user_id)" +
+    @Insert("insert into forum (forum_title,forum_body,forum_like,create_date,update_date,user_id,forum_pv)" +
             "values " +
-            "(#{forumTitle},#{forumBody},#{forumLike},#{createDate},#{updateDate},#{userId})")
+            "(#{forumTitle},#{forumBody},#{forumLike},#{createDate},#{updateDate},#{userId},0)")
     @Options(useGeneratedKeys = true,keyProperty = "forumId",keyColumn = "forum_id")
     void insert(Forum forum);
 
