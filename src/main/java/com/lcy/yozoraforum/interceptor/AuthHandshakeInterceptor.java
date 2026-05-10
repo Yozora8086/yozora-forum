@@ -29,24 +29,30 @@ public class AuthHandshakeInterceptor implements HandshakeInterceptor {
     public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler wsHandler, Map<String, Object> attributes) throws Exception {
 
         try {
+            //获取请求头
             HttpHeaders headers = request.getHeaders();
+            //从请求头中获取cookie
             List<String> cookies = headers.get("Cookie");
-
+            //从cookie中获取Token
             String token = extractToken(cookies);
 
+            //判断token是否为空
             if (token == null){
                 System.out.println("拒绝握手:没有token");
                 return false;
             }
 
+            //如果不为空，则解析token中userId
             Claims claims = JWTUtils.checkToken(token);
             Object uid = claims.get("userId");
 
+            //如果uid为空，则该token不合法或者已经失效
             if (uid == null) {
-                System.out.println("WS handshake failed: no userId in token");
+                System.out.println("userId不存在");
                 return false;
             }
 
+            //类型转换
             Long userId = ((Number) uid).longValue();
             System.out.printf("握手时的token", userId);
 
@@ -66,11 +72,18 @@ public class AuthHandshakeInterceptor implements HandshakeInterceptor {
 
     }
 
+    /**
+     * 解析token
+     * @param cookies
+     * @return
+     */
     private String extractToken(List<String> cookies) {
+        //判断cookie是否为空
         if (cookies == null || cookies.isEmpty()) {
             return null;
         }
 
+        //遍历cookie,去除符号
         for (String cookie : cookies) {
             String[] parts = cookie.split(";");
             for (String part : parts) {

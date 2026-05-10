@@ -32,6 +32,6 @@ mybatis:
 aliyun:
   oss:
     endpoint: oss-cn-beijing.aliyuncs.com
-    access-key-id: LTAI5t9co5nBhx36DXakdTNV
-    access-key-secret: 58xV8qFRnVyRmOuawRgcIKdbBri3FK
+    access-key-id: ${ALIYUN_ACCESS_KEY_ID}
+    access-key-secret: ${ALIYUN_ACCESS_KEY_SECRET}
     bucket-name: yozora-forum
