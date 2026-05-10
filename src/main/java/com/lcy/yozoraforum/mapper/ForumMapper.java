@@ -1,5 +1,6 @@
 package com.lcy.yozoraforum.mapper;
 
+import com.lcy.yozoraforum.dto.ForumPVDTO;
 import com.lcy.yozoraforum.dto.ShowForumDTO;
 import com.lcy.yozoraforum.dto.UpdateForumDTO;
 import com.lcy.yozoraforum.entity.Forum;
@@ -77,7 +78,7 @@ public interface ForumMapper {
      * @param pageSize
      * @return
      */
-    List<Forum> showSearchForum(@Param("body") String body,@Param("offset") int offset,@Param("pageSize") int pageSize);
+    List<ForumWrapper> showSearchForum(@Param("body") String body,@Param("offset") int offset,@Param("pageSize") int pageSize);
 
     /**
      * 根据帖子id查询发布用户
@@ -99,4 +100,17 @@ public interface ForumMapper {
      */
     @Update("update forum set forum_pv = forum_pv + 1 where forum_id = #{forumId}")
     void updatePV(Long forumId);
+
+    /**
+     * 获取帖子表里的帖子总数量(模糊查询)
+     * @param body
+     * @return
+     */
+    Long selectSearchAll(String body);
+
+    /**
+     * 帖子浏览量同步(redis TO MySQL)
+     * @param pvList
+     */
+    void PVToMySQL(List<ForumPVDTO> pvList);
 }

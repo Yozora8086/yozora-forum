@@ -5,12 +5,10 @@ import com.lcy.yozoraforum.context.BaseContext;
 import com.lcy.yozoraforum.dto.UpdateForumDTO;
 import com.lcy.yozoraforum.entity.Forum;
 import com.lcy.yozoraforum.exception.BizException;
-import com.lcy.yozoraforum.mapper.ForumLikeUserRelationMapper;
-import com.lcy.yozoraforum.mapper.ForumMapper;
-import com.lcy.yozoraforum.mapper.ForumResourceUrlMapper;
-import com.lcy.yozoraforum.mapper.ForumTagRelationMapper;
+import com.lcy.yozoraforum.mapper.*;
 import com.lcy.yozoraforum.service.UserCenterService;
 import com.lcy.yozoraforum.util.OssUtils;
+import com.lcy.yozoraforum.vo.ShowUserMsgVO;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -31,7 +29,19 @@ public class UserCenterServiceImpl implements UserCenterService {
     @Autowired
     private ForumResourceUrlMapper forumResourceUrlMapper;
     @Autowired
+    private UserMapper userMapper;
+    @Autowired
     private OSS ossClient;
+
+    /**
+     * 查询用户自己的个人信息
+     * @return
+     */
+    @Override
+    public ShowUserMsgVO selectMineMsg() {
+        ShowUserMsgVO userMsgVO = userMapper.selectUserMsg(BaseContext.getCurrentId());
+        return userMsgVO;
+    }
 
     private static final String BUCKET_NAME = "yozora-forum";
     /**

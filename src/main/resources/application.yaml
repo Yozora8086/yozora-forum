@@ -15,8 +15,13 @@ spring:
       database: 2
   druid:
     initial-size: 5
-    min-idle: 5
-    max-active: 20
+    min-idle: 10
+    max-active: 50
+
+server:
+  tomcat:
+    max-threads: 1000
+    accept-count: 5000  # 请求排队数量
 
 mybatis:
   mapper-locations: classpath*:mapper/*.xml

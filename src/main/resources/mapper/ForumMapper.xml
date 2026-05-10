@@ -1,7 +1,16 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.lcy.yozoraforum.mapper.ForumMapper">
-  <select id="showForumList" resultType="com.lcy.yozoraforum.wrapper.ForumWrapper">
+    <update id="PVToMySQL">
+        <foreach collection="pvList" item="item" separator=";">
+            UPDATE forum
+            SET forum_pv = #{item.forumPV}
+            WHERE forum_id = #{item.forumId}
+        </foreach>
+    </update>
+
+
+    <select id="showForumList" resultType="com.lcy.yozoraforum.wrapper.ForumWrapper">
       SELECT
           f.*,
           COUNT(c.comment_id) AS forum_comment_count,
@@ -18,20 +27,30 @@
     </select>
 
     <select id="selectForum" resultType="com.lcy.yozoraforum.wrapper.ForumWrapper">
-        select f.*,u.user_name from forum f left join user u on f.user_id = u.user_id where forum_id = #{forumId}
+        select f.*,u.user_name,flu.status from forum f left join user u on f.user_id = u.user_id  left join forum_like_user_relation flu on f.forum_id = flu.forum_id where f.forum_id = #{forumId}
     </select>
 
-    <select id="showSearchForum" resultType="com.lcy.yozoraforum.entity.Forum">
-        SELECT *
-        FROM forum
-        WHERE forum_title LIKE CONCAT('%', #{body}, '%')
-           OR forum_body  LIKE CONCAT('%', #{body}, '%')
-        ORDER BY create_date DESC
+    <select id="showSearchForum" resultType="com.lcy.yozoraforum.wrapper.ForumWrapper">
+        SELECT
+            f.*,
+            COUNT(c.comment_id) AS forum_comment_count,
+            u.user_name
+        FROM forum f
+                 LEFT JOIN comments c ON f.forum_id = c.forum_id
+                 LEFT JOIN user u ON f.user_id = u.user_id
+        WHERE f.forum_title LIKE CONCAT('%', #{body}, '%')
+           OR f.forum_body  LIKE CONCAT('%', #{body}, '%')
+        GROUP BY f.forum_id
+        ORDER BY f.create_date DESC
             LIMIT #{offset}, #{pageSize}
     </select>
 
 
     <select id="selectUserByForum" resultType="java.lang.Long">
         select user_id from forum where forum_id = #{forumId}
+    </select>
+
+    <select id="selectSearchAll" resultType="java.lang.Long">
+        select  count(*) from forum WHERE forum_title LIKE CONCAT('%', #{body}, '%') OR forum_body  LIKE CONCAT('%', #{body}, '%')
     </select>
 </mapper>

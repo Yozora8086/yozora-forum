@@ -2,6 +2,7 @@ package com.lcy.yozoraforum.service;
 
 import com.lcy.yozoraforum.dto.UpdateForumDTO;
 import com.lcy.yozoraforum.entity.Forum;
+import com.lcy.yozoraforum.vo.ShowUserMsgVO;
 
 import java.util.List;
 
@@ -27,4 +28,10 @@ public interface UserCenterService {
      * @param forumId
      */
     void deleteMineForum(Long forumId);
+
+    /**
+     * 查询用户自己的个人信息
+     * @return
+     */
+    ShowUserMsgVO selectMineMsg();
 }

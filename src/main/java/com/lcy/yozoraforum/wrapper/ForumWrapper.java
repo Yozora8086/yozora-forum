@@ -41,4 +41,6 @@ public class ForumWrapper {
     private Long forumPV;
     //帖子发布者用户名
     private String userName;
+    //当前用户是否已经点赞
+    private int status;
 }

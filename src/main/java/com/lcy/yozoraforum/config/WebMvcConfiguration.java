@@ -31,7 +31,7 @@ public class WebMvcConfiguration extends WebMvcConfigurationSupport {
     protected void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")  // 允许所有路径
                 .allowedOrigins("http://localhost:5173") // 允许前端地址
-                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS","PATCH")
                 .allowCredentials(true);
     }
 }

@@ -6,6 +6,7 @@ import com.lcy.yozoraforum.service.UserCenterService;
 import com.lcy.yozoraforum.util.Result;
 import com.lcy.yozoraforum.vo.ForumVo;
 import com.lcy.yozoraforum.vo.MineForumVO;
+import com.lcy.yozoraforum.vo.ShowUserMsgVO;
 import org.apache.ibatis.annotations.Delete;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -18,6 +19,16 @@ import java.util.stream.Collectors;
 public class UserCenterController {
     @Autowired
     private UserCenterService userCenterService;
+
+    /**
+     * 查询用户自己的个人信息
+     * @return
+     */
+    @GetMapping("/showMineMsg")
+    public Result<ShowUserMsgVO> selectMineMsg(){
+        ShowUserMsgVO userMsgVO = userCenterService.selectMineMsg();
+        return Result.success(userMsgVO);
+    }
 
     /**
      * 分页查询我发布的帖子

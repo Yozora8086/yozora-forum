@@ -1,5 +1,6 @@
 package com.lcy.yozoraforum.service.impl;
 
+import com.alibaba.fastjson.JSONObject;
 import com.aliyun.oss.OSS;
 import com.lcy.yozoraforum.context.BaseContext;
 import com.lcy.yozoraforum.dto.ForumDTO;
@@ -16,6 +17,7 @@ import com.lcy.yozoraforum.mapper.ForumTagRelationMapper;
 import com.lcy.yozoraforum.mapper.TagsMapper;
 import com.lcy.yozoraforum.service.CommentsService;
 import com.lcy.yozoraforum.service.ForumService;
+import com.lcy.yozoraforum.util.RedisLockUtil;
 import com.lcy.yozoraforum.vo.CommentsVO;
 import com.lcy.yozoraforum.vo.ForumVo;
 import com.lcy.yozoraforum.wrapper.ForumWrapper;
@@ -35,10 +37,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -52,10 +51,18 @@ public class ForumServiceImpl implements ForumService {
     private TagsMapper tagsMapper;
     @Autowired
     private StringRedisTemplate redisTemplate;
+//    @Autowired
+//    private RedisTemplate<String,Object> redis;
     @Autowired
     private CommentsService commentsService;
     @Autowired
     private ForumResourceUrlMapper forumResourceUrlMapper;
+    @Autowired
+    private DefaultRedisScript<Long> cacheForumAndForumPVScript;
+    @Autowired
+    private DefaultRedisScript<String> checkTTLScript;
+    @Autowired
+    private RedisLockUtil redisLockUtil;
 
     @Autowired
     private OSS ossClient;
@@ -182,45 +189,69 @@ public class ForumServiceImpl implements ForumService {
      * @return
      */
     @Override
-    @Transactional
     public ForumWrapper showForum(Long forumId) {
-        //根据帖子id查询帖子
-        ForumWrapper forumWrapper = forumMapper.selectForum(forumId);
-        //根据帖子id查询帖子所携带的资源
-        List<String> forumResourceUrlList = forumResourceUrlMapper.select(forumId);
 
-        //帖子浏览量自增
-        forumMapper.updatePV(forumId);
+        String forumJson = redisTemplate.execute(checkTTLScript, Collections.emptyList(), forumId.toString(), "3600", "86400");
 
-
-        for (String s : forumResourceUrlList) {
-            System.out.println("------------------------------"+s);
+        //缓存命中直接返回
+        if (forumJson != null){
+            ForumWrapper forumWrapper = JSONObject.parseObject(forumJson, ForumWrapper.class);
+            return forumWrapper;
         }
 
-        //根据帖子id查询当前帖子所添加的分类标签
-        List<Tags> tagsList = forumTagRelationMapper.selectTags(forumId);
+        //缓存未命中
+        String lockKey = "lock:forum:" + forumId.toString();
+        //获取互斥锁
+        boolean result = redisLockUtil.tryLock(lockKey);
+        if (result == true){
+                //根据帖子id查询帖子
+                ForumWrapper forumWrapper = forumMapper.selectForum(forumId);
+                //根据帖子id查询帖子所携带的资源
+                List<String> forumResourceUrlList = forumResourceUrlMapper.select(forumId);
 
-        //将帖子标签挂载到帖子对象中
-        forumWrapper.setTags(tagsList);
-        //将帖子资源挂载到帖子对象中
-        forumWrapper.setUrl(forumResourceUrlList);
-
-        //将Forum对象赋值给ForumWrapper对象
-//        ForumWrapper forumWrapper = ForumWrapper.builder()
-//                .forumId(forum.getForumId())
-//                .forumTitle(forum.getForumTitle())
-//                .forumBody(forum.getForumBody())
-//                .forumLike(forum.getForumLike())
-//                .createDate(forum.getCreateDate())
-//                .userId(forum.getUserId())
-//                .tags(tagsList)
-//                .url(forumResourceUrlList)
-//                .forumPV(forum.getForumPV())
-//
-//                .build();
+                //帖子浏览量自增
+//                forumMapper.updatePV(forumId);
 
 
-        return forumWrapper;
+//                for (String s : forumResourceUrlList) {
+//                    System.out.println("------------------------------"+s);
+//                }
+
+                //根据帖子id查询当前帖子所添加的分类标签
+                List<Tags> tagsList = forumTagRelationMapper.selectTags(forumId);
+
+                //将帖子标签挂载到帖子对象中
+                forumWrapper.setTags(tagsList);
+                //将帖子资源挂载到帖子对象中
+                forumWrapper.setUrl(forumResourceUrlList);
+
+                //将查询到的数据缓存到redis中
+
+                String jsonString = JSONObject.toJSONString(forumWrapper);
+
+                //声明TTL(单位s)
+                Integer ttl = 86400;
+
+                //执行lua脚本
+                redisTemplate.execute(cacheForumAndForumPVScript,Collections.emptyList(),forumId.toString(),jsonString,forumWrapper.getForumPV().toString(),ttl.toString());
+
+    //          disTemplate.opsForValue().set("forum:cache:" + forumId,jsonString);
+
+                //释放锁
+                redisLockUtil.unLock(lockKey);
+
+                return forumWrapper;
+        } else {
+            try {
+                Thread.sleep(50);
+            } catch (Exception e){
+
+            }
+            showForum(forumId);
+        }
+
+        return null;
+
     }
 
     /**
@@ -279,34 +310,43 @@ public class ForumServiceImpl implements ForumService {
     public List<ForumWrapper> searchPost(String body,int page,int pageSize) {
         //当前页数起始条
         int offset = (page - 1) * pageSize;
-        List<Forum> forumList = forumMapper.showSearchForum(body,offset,pageSize);
-        //判断是否查询到帖子
-        if (forumList.isEmpty()){
-            throw new ForumNotFindException("没有查询到帖子");
-        }
-
-
-
+        //执行查询
+        List<ForumWrapper> forumWrappersList = forumMapper.showSearchForum(body,offset,pageSize);
         //stream流操作,把每个 Forum 转成 ForumWrapper。
-        List<ForumWrapper> forumWrapperList = forumList.stream()
-                .map(forum -> {
-                    ForumWrapper forumWrapper = new ForumWrapper();
-                    forumWrapper.setForumId(forum.getForumId());
-                    forumWrapper.setForumTitle(forum.getForumTitle());
-                    forumWrapper.setForumBody(forum.getForumBody());
-                    forumWrapper.setForumLike(forum.getForumLike());
-                    forumWrapper.setCreateDate(forum.getCreateDate());
-                    forumWrapper.setUserId(forum.getUserId());
-                    return forumWrapper;
-                })
-                .collect(Collectors.toList());
+//        List<ForumWrapper> forumWrapperList = forumList.stream()
+//                .map(forum -> {
+//                    ForumWrapper forumWrapper = new ForumWrapper();
+//                    forumWrapper.setForumId(forum.getForumId());
+//                    forumWrapper.setForumTitle(forum.getForumTitle());
+//                    forumWrapper.setForumBody(forum.getForumBody());
+//                    forumWrapper.setForumLike(forum.getForumLike());
+//                    forumWrapper.setCreateDate(forum.getCreateDate());
+//                    forumWrapper.setUserId(forum.getUserId());
+//                    forumWrapper.setForumCommentCount(forum.getForumCommentCount());
+//                    forumWrapper.setForumPV(forum.getForumPV());
+//                    return forumWrapper;
+//                })
+//                .collect(Collectors.toList());
+
         //遍历数据库返回的集合，因为Forum实体类缺少Tags集合
-        for (ForumWrapper forumWrapper : forumWrapperList) {
+        for (ForumWrapper forumWrapper : forumWrappersList) {
             //将查询到tags集合存入ForumWrapper对象中
             List<Tags> tagsList = forumTagRelationMapper.selectTags(forumWrapper.getForumId());
             forumWrapper.setTags(tagsList);
         }
-        return forumWrapperList;
+        return forumWrappersList;
+    }
+
+    /**
+     * 获取帖子表里的帖子总数量(模糊查询)
+     * @param body
+     * @return
+     */
+    @Override
+    public Long selectSearchAllForum(String body) {
+        //获取帖子表里的帖子总数量
+        Long forumCount = forumMapper.selectSearchAll(body);
+        return forumCount;
     }
 
     //    /**

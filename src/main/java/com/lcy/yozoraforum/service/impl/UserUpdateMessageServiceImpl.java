@@ -22,8 +22,10 @@ public class UserUpdateMessageServiceImpl implements UserUpdateMessageService {
     public void update(UserUpdateMsgDTO updateMsgDTO) {
 
         //判断用户名是否符合命名规则
-        if (updateMsgDTO.getUserName() == null || updateMsgDTO.getUserName().isEmpty() || updateMsgDTO.getUserName().length() > 20  ){
-            throw new RegisterArgsErrorException("用户名不合法");
+        if (updateMsgDTO.getUserName() != null){
+            if (updateMsgDTO.getUserName() == null || updateMsgDTO.getUserName().isEmpty() || updateMsgDTO.getUserName().length() > 20  ){
+                throw new RegisterArgsErrorException("用户名不合法");
+            }
         }
 
         //判断该用户名和邮箱是否已经被使用

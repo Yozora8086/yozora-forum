@@ -48,4 +48,11 @@ public interface ForumService {
      * @return
      */
     Long selectAllForum();
+
+    /**
+     * 获取帖子表里的帖子总数量(模糊查询)
+     * @param body
+     * @return
+     */
+    Long selectSearchAllForum(String body);
 }

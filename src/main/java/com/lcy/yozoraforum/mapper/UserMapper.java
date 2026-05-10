@@ -3,6 +3,7 @@ package com.lcy.yozoraforum.mapper;
 import com.lcy.yozoraforum.dto.UserDTO;
 import com.lcy.yozoraforum.dto.UserUpdateMsgDTO;
 import com.lcy.yozoraforum.entity.User;
+import com.lcy.yozoraforum.vo.ShowUserMsgVO;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -49,4 +50,12 @@ public interface UserMapper {
      * @param updateMsgDTO
      */
     void update(@Param("updateMsgDTO") UserUpdateMsgDTO updateMsgDTO, @Param("userId") Long userId);
+
+
+    /**
+     * 查询用户自己的个人信息
+     * @param userId
+     * @return
+     */
+    ShowUserMsgVO selectUserMsg(Long userId);
 }

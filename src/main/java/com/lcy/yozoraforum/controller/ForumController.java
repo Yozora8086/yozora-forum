@@ -78,6 +78,16 @@ public class ForumController {
   }
 
     /**
+     * 获取帖子表里的帖子总数量(模糊查询)
+     * @return
+     */
+    @GetMapping("/getSearchAllForum")
+    public Result<Long> selectSearchAllForum(@RequestParam String body){
+        Long forumCount = forumService.selectSearchAllForum(body);
+        return Result.success(forumCount);
+    }
+
+    /**
      * 浏览帖子(进入所选择的帖子)
      * @param forumId 是分页查询每个帖子对象所携带的帖子id
      * @return
@@ -102,6 +112,7 @@ public class ForumController {
               .tags(forumVo.getTags())
               .forumPV(forumVo.getForumPV())
               .userName(forumVo.getUserName())
+              .status(forumVo.getStatus())
               .build();
 
       //返沪
@@ -143,6 +154,9 @@ public class ForumController {
                    forumVo.setCreateDate(forum.getCreateDate());
                    forumVo.setUserId(forum.getUserId());
                    forumVo.setTags(forum.getTags());
+                   forumVo.setForumPV(forum.getForumPV());
+                   forumVo.setForumCommentCount(forum.getForumCommentCount());
+                   forumVo.setUserName(forum.getUserName());
                    return forumVo;
                })
                .collect(Collectors.toList());

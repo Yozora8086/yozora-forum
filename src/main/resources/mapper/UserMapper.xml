@@ -2,7 +2,28 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.lcy.yozoraforum.mapper.UserMapper">
 
+<!--    <update id="update1">-->
+<!--        update user set user_name = #{updateMsgDTO.userName},user_age = #{updateMsgDTO.userAge},user_message = #{updateMsgDTO.userMessage} where user_id = #{userId}-->
+<!--    </update>-->
+
     <update id="update">
-        update user set user_name = #{updateMsgDTO.userName},user_age = #{updateMsgDTO.userAge},user_message = #{updateMsgDTO.userMessage} where user_id = #{userId}
+        update user
+        <set>
+            <if test="updateMsgDTO.userName != null and updateMsgDTO.userName != ''">
+                user_name = #{updateMsgDTO.userName},
+            </if>
+            <if test="updateMsgDTO.userAge != null and updateMsgDTO.userAge != ''">
+                user_age = #{updateMsgDTO.userAge},
+            </if>
+            <if test="updateMsgDTO.userMessage != null and updateMsgDTO.userMessage != ''">
+                user_message = #{updateMsgDTO.userMessage}
+            </if>
+        </set>
+        where user_id = #{userId}
     </update>
+
+
+    <select id="selectUserMsg" resultType="com.lcy.yozoraforum.vo.ShowUserMsgVO">
+        select user_name,user_email,user_message,register_time from user where user_id = #{userId}
+    </select>
 </mapper>
