@@ -112,5 +112,5 @@ public interface ForumMapper {
      * 帖子浏览量同步(redis TO MySQL)
      * @param pvList
      */
-    void PVToMySQL(List<ForumPVDTO> pvList);
+    void PVToMySQL(ForumPVDTO pvList);
 }

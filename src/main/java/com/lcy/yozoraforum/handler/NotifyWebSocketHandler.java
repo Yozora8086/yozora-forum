@@ -25,7 +25,10 @@ public class NotifyWebSocketHandler extends TextWebSocketHandler {
        Long userId = (Long) session.getAttributes().get("userId");
        //将用户加入在线表
        ONLINE.put(userId,session);
-        System.out.println("WebSocket 连接成功，sessionId=" + session.getId());
+       System.out.println("WebSocket 连接成功，sessionId=" + session.getId());
+
+        System.out.println("afterConnectionEstablished userId = " + userId);
+        System.out.println("当前在线用户：" + ONLINE.keySet());
     }
 
     @Override
@@ -55,7 +58,14 @@ public class NotifyWebSocketHandler extends TextWebSocketHandler {
      * @param msg
      */
     public static void push(Long userId,String msg){
+        System.out.println("当前在线用户：" + ONLINE.keySet());
+        System.out.println("准备推送给：" + userId);
+
+
         WebSocketSession s = ONLINE.get(userId);
+
+
+        System.out.println("session是否存在：" + (s != null));
         if (s != null && s.isOpen()){
             try {
                 s.sendMessage(new TextMessage(msg));

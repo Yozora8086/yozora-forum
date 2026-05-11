@@ -21,7 +21,7 @@ public class PVSync {
     @Autowired
     private ForumMapper forumMapper;
 
-    @Scheduled(fixedDelay = 10000)
+    @Scheduled(fixedDelay = 60000)
     public void syncToMySQL(){
         List<ForumPVDTO> PVList= new ArrayList<>();
 
@@ -44,7 +44,9 @@ public class PVSync {
         }
 
         if (!PVList.isEmpty()){
-            forumMapper.PVToMySQL(PVList);
+            for (ForumPVDTO forumPVDTO : PVList) {
+                forumMapper.PVToMySQL(forumPVDTO);
+            }
         }
     }
 

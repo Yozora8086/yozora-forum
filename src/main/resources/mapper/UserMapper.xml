@@ -24,6 +24,6 @@
 
 
     <select id="selectUserMsg" resultType="com.lcy.yozoraforum.vo.ShowUserMsgVO">
-        select user_name,user_email,user_message,register_time from user where user_id = #{userId}
+        select user_name,user_id,user_email,user_message,register_time from user where user_id = #{userId}
     </select>
 </mapper>

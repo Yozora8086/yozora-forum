@@ -33,8 +33,20 @@ public class AuthHandshakeInterceptor implements HandshakeInterceptor {
             HttpHeaders headers = request.getHeaders();
             //从请求头中获取cookie
             List<String> cookies = headers.get("Cookie");
+
+            //打印cookie
+            System.out.println("WS Cookie = " + cookies);
             //从cookie中获取Token
             String token = extractToken(cookies);
+
+            if (token == null) {
+                String query = request.getURI().getQuery();
+                System.out.println("WS Query = " + query);
+
+                if (query != null && query.startsWith("token=")) {
+                    token = query.substring("token=".length());
+                }
+            }
 
             //判断token是否为空
             if (token == null){
@@ -54,7 +66,7 @@ public class AuthHandshakeInterceptor implements HandshakeInterceptor {
 
             //类型转换
             Long userId = ((Number) uid).longValue();
-            System.out.printf("握手时的token", userId);
+            System.out.println("握手时的token:"+ userId);
 
             //将userId绑定到Session
             attributes.put("userId",userId);

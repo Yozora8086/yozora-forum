@@ -6,6 +6,6 @@
                        (#{chatSenderId},#{chatReceiverId},#{chatContent},now(),#{chatIsread})
    </insert>
     <select id="select" resultType="com.lcy.yozoraforum.vo.ChatVO">
-        select * from chat where chat_sender_id = #{senderId} and chat_receiver_id = #{receiverId} order by create_time desc
+        select * from chat where chat_sender_id = #{senderId} or chat_sender_id = #{receiverId} and chat_receiver_id = #{receiverId} or chat_receiver_id = #{senderId} order by create_time desc
     </select>
 </mapper>
