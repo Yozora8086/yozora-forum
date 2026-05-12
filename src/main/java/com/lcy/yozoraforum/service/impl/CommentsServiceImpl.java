@@ -54,7 +54,7 @@ public class CommentsServiceImpl implements CommentsService {
     public Comments insertComment(InsertCommentsDTO insertCommentsDTO) {
         //校验评论是否为空
         if (insertCommentsDTO.getContent() == null || insertCommentsDTO.getContent().trim().isEmpty()) {
-            throw new CommentIsNullException("评论为空");
+            throw new CommentIsNullException();
         }
         commentsMapper.insert(insertCommentsDTO, BaseContext.getCurrentId());
         Comments comments = Comments.builder()

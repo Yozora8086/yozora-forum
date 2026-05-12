@@ -69,7 +69,7 @@ public class UserCenterServiceImpl implements UserCenterService {
         int rows = forumMapper.updateForum(updateForumDTO,BaseContext.getCurrentId());
 
         if (rows == 0){
-            throw new BizException("无权 修改/删除 该帖子或帖子不存在");
+            throw new BizException();
         }
     }
 
@@ -100,7 +100,7 @@ public class UserCenterServiceImpl implements UserCenterService {
 
 
         if (rows == 0){
-            throw new BizException("无权 修改/删除 该帖子或帖子不存在");
+            throw new BizException();
         }
 
         redisTemplate.delete(List.of(

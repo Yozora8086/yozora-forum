@@ -1,5 +1,6 @@
 package com.lcy.yozoraforum.handler;
 
+import com.lcy.yozoraforum.exception.BizException;
 import com.lcy.yozoraforum.exception.CommentIsNullException;
 import com.lcy.yozoraforum.exception.CommentNotExistException;
 import com.lcy.yozoraforum.exception.ForumNotFindException;
@@ -49,6 +50,16 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(CommentNotExistException.class)
     public Result handleCommentNotExistException(CommentNotExistException ex){
+        return Result.error(ex.getMessage());
+    }
+
+    /**
+     * 修改/删除 帖子不存在或者越权
+     * @param ex
+     * @return
+     */
+    @ExceptionHandler(BizException.class)
+    public Result handleBizException(BizException ex){
         return Result.error(ex.getMessage());
     }
 }

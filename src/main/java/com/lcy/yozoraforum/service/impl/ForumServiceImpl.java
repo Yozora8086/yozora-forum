@@ -104,7 +104,7 @@ public class ForumServiceImpl implements ForumService {
         //创建url集合
         List<String> urls = new ArrayList<>();
         //当没有资源上传时直接返回
-        if (urls.isEmpty()){
+        if (forumDTO.getResource().isEmpty()){
             return;
         }
         //遍历用户上传信息集合
@@ -114,10 +114,11 @@ public class ForumServiceImpl implements ForumService {
             //uuid+文件名 拼接
             String fileName = uuid + multipartFile.getOriginalFilename();
             try {
+                System.out.println("oss开始上传");
                 //上传到oss
                 ossClient.putObject(bucketName,fileName,multipartFile.getInputStream());
             } catch (IOException e) {
-                throw new RuntimeException("OSS文件上传失败");
+                e.printStackTrace();
             }
             // 返回访问URL
             String url = String.format("https://%s.%s/%s", bucketName, "oss-cn-beijing.aliyuncs.com", fileName);
