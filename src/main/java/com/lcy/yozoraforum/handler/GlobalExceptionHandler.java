@@ -1,9 +1,6 @@
 package com.lcy.yozoraforum.handler;
 
-import com.lcy.yozoraforum.exception.BizException;
-import com.lcy.yozoraforum.exception.CommentIsNullException;
-import com.lcy.yozoraforum.exception.CommentNotExistException;
-import com.lcy.yozoraforum.exception.ForumNotFindException;
+import com.lcy.yozoraforum.exception.*;
 import com.lcy.yozoraforum.util.Result;
 import io.jsonwebtoken.ExpiredJwtException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -61,5 +58,15 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(BizException.class)
     public Result handleBizException(BizException ex){
         return Result.error(ex.getMessage());
+    }
+
+    /**
+     * 系统消息发送越权
+     * @param ex
+     * @return
+     */
+    @ExceptionHandler(PermissionException.class)
+    public Result handlePermissionException(PermissionException ex){
+        return Result.error("越权操作");
     }
 }

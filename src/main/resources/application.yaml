@@ -17,6 +17,12 @@ spring:
     initial-size: 5
     min-idle: 10
     max-active: 50
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: Kazusa
+    password: qwer1234
+    virtual-host: /WB2
 
 server:
   tomcat:

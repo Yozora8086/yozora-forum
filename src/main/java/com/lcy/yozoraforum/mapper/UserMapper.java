@@ -58,4 +58,12 @@ public interface UserMapper {
      * @return
      */
     ShowUserMsgVO selectUserMsg(Long userId);
+
+    /**
+     * 查询当前登录用户的用户等级
+     * @param userId
+     * @return
+     */
+    @Select("select user_level from user where user_id = #{userId}")
+    int selectUserLevel(Long userId);
 }

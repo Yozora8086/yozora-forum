@@ -8,7 +8,7 @@
    </insert>
 
 
-    <select id="selectMsg" resultType="com.lcy.yozoraforum.entity.Notification">
-        select * from notification where user_id = #{user_id} order by create_time desc
+    <select id="selectMsg" resultType="com.lcy.yozoraforum.wrapper.NotificationWrapper">
+        select n.*,u.user_name  as sender_name from notification n left join user u on n.sender_id = u.user_id where n.user_id = #{user_id} order by n.create_time desc
     </select>
 </mapper>

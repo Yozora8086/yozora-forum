@@ -1,6 +1,7 @@
-package com.lcy.yozoraforum.vo;
+package com.lcy.yozoraforum.wrapper;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -9,7 +10,10 @@ import java.time.LocalDateTime;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class NotificationVO {
+@Builder
+public class NotificationWrapper {
+    //通知信息id
+    private Long notificationId;
     //收到通知用户id
     private Long userId;
     //触发者（发起者，其他用户或者系统）
@@ -18,8 +22,6 @@ public class NotificationVO {
     private int type;
     //被操作对象类型 如帖子 = 1，资源 = 2，评论 =3
     private int target;
-    //发送者呢称
-    private String senderName;
     //通知内容
     private String content;
     //通知跳转url
@@ -28,4 +30,6 @@ public class NotificationVO {
     private boolean isRead;
     //通知创建时间
     private LocalDateTime createTime;
+    //发送者呢称
+    private String senderName;
 }

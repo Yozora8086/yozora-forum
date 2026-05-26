@@ -1,5 +1,6 @@
 package com.lcy.yozoraforum.handler;
 
+import com.lcy.yozoraforum.context.BaseContext;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
@@ -7,6 +8,7 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -58,7 +60,6 @@ public class NotifyWebSocketHandler extends TextWebSocketHandler {
 
         WebSocketSession s = ONLINE.get(userId);
 
-
         if (s != null && s.isOpen()){
             try {
                 s.sendMessage(new TextMessage(msg));
@@ -69,6 +70,24 @@ public class NotifyWebSocketHandler extends TextWebSocketHandler {
 
         }
     }
+
+
+//    public static void push(String content, Integer userLevel, LocalDateTime createTime){
+//
+//
+//        Long userId = BaseContext.getCurrentId();
+//        WebSocketSession s = ONLINE.get(userId);
+//
+//        if (s != null && s.isOpen()){
+//            try {
+//                s.sendMessage(new TextMessage(msg));
+//            } catch (IOException e){
+//                System.out.println("推送消息失败 userId=" + userId);
+//                ONLINE.remove(userId);//清理失效session
+//            }
+//
+//        }
+//    }
 
 
 }
