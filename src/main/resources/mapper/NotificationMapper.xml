@@ -2,13 +2,23 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.lcy.yozoraforum.mapper.NotificationMapper">
    <insert id="InsertNotification">
-       insert into notification (user_id,sender_id,type,target,content,link_url,is_read,create_time)
+       insert into notification (user_id,sender_id,type,target,content,link_url,is_read,create_time,title,super_notification_id)
        values
-           (#{userId},#{senderId},#{type},#{target},#{content},#{linkUrl},#{isRead},now())
+           (#{userId},#{senderId},#{type},#{target},#{content},#{linkUrl},#{isRead},now(),#{title},#{superNotificationId})
    </insert>
+
+
+    <update id="contentRead">
+        update notification set is_read = 1 where notification_id = #{notificationId}
+    </update>
 
 
     <select id="selectMsg" resultType="com.lcy.yozoraforum.wrapper.NotificationWrapper">
         select n.*,u.user_name  as sender_name from notification n left join user u on n.sender_id = u.user_id where n.user_id = #{user_id} order by n.create_time desc
+    </select>
+
+
+    <select id="getNotification" resultType="java.lang.Integer">
+        select count(*) from notification where user_id = #{userId} and type = 1 and is_read = 0
     </select>
 </mapper>

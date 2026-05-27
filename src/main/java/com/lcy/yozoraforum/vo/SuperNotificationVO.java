@@ -11,10 +11,14 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class SuperNotificationVO {
+    //系统通知id
+    private Long superNotificationId;
     //接收用户类型
     private Integer userLevel;
+    //消息标题
+    private String title;
     //消息内容
-    private String content;
+//    private String content;
     //通知创建时间
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createTime;

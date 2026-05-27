@@ -10,6 +10,8 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class NotificationVO {
+    //通知Id
+    private Long notificationId;
     //收到通知用户id
     private Long userId;
     //触发者（发起者，其他用户或者系统）
@@ -21,11 +23,13 @@ public class NotificationVO {
     //发送者呢称
     private String senderName;
     //通知内容
-    private String content;
+//    private String content;
     //通知跳转url
     private String linkUrl;
     //是否已读
     private boolean isRead;
     //通知创建时间
     private LocalDateTime createTime;
+    //通知标题
+    private String title;
 }

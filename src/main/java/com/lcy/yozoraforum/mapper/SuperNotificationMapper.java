@@ -20,6 +20,21 @@ public interface SuperNotificationMapper {
      * @param userLevel
      * @return
      */
-    @Select("select user_level,content,create_time from super_notification where user_level = #{userlevel}")
+    @Select("select super_notification_id,user_level,title,content,create_time from super_notification where user_level = #{userlevel}")
     List<SuperNotificationVO> selectSuperNotification(int userLevel);
+
+
+    /**
+     * 查询系统通知详情
+     * @param notificationId
+     * @return
+     */
+    SuperNotificationVO selectContent(Long notificationId);
+
+    /**
+     * 获取系统未读通知数量
+     * @param userId
+     * @return
+     */
+    Integer getSystemNotification(Long userId);
 }

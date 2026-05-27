@@ -29,5 +29,9 @@ public class Notification {
     private boolean isRead;
     //通知创建时间
     private LocalDateTime createTime;
+    //通知标题
+    private String title;
+    //系统通知id
+    private Long superNotificationId;
 
 }

@@ -3,8 +3,18 @@
 <mapper namespace="com.lcy.yozoraforum.mapper.SuperNotificationMapper">
 
     <insert id="insertMsg">
-        insert into super_notification (user_level,content,create_time)
+        insert into super_notification (user_level,title,content,create_time)
         values
         (#{userLevel},#{content},#{createTime})
     </insert>
+
+    <select id="selectContent" resultType="com.lcy.yozoraforum.vo.SuperNotificationVO">
+        select * from super_notification where super_notification_id = #{notificationId}
+    </select>
+
+
+    <select id="getSystemNotification" resultType="java.lang.Integer">
+        select count(*) from super_notification s left join notification n on s.super_notification_id = n.super_notification_id
+        and n.user_id = #{userId} and n.type = 3 where n.notification_id is null
+    </select>
 </mapper>

@@ -11,6 +11,8 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class SuperNotificationDTO {
+    //通知标题
+    private String title;
     //通知内容
     private String content;
     //接收用户类型

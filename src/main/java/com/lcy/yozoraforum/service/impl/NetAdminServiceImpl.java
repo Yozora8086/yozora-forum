@@ -46,6 +46,7 @@ public class NetAdminServiceImpl implements NetAdminService {
 
         SuperNotificationWrapper superNotificationWrapper = SuperNotificationWrapper.builder()
                 .userId(BaseContext.getCurrentId())
+                .title(superNotificationDTO.getTitle())
                 .content(superNotificationDTO.getContent())
                 .createTime(superNotificationDTO.getCreateTime())
                 .userLevel(superNotificationDTO.getUserLevel())

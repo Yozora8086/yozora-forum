@@ -23,7 +23,7 @@ public class NotificationWrapper {
     //被操作对象类型 如帖子 = 1，资源 = 2，评论 =3
     private int target;
     //通知内容
-    private String content;
+//    private String content;
     //通知跳转url
     private String linkUrl;
     //是否已读
@@ -32,4 +32,6 @@ public class NotificationWrapper {
     private LocalDateTime createTime;
     //发送者呢称
     private String senderName;
+    //通知标题
+    private String title;
 }

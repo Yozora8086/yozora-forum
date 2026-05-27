@@ -15,6 +15,8 @@ import java.time.LocalDateTime;
 public class SuperNotificationWrapper {
     //推送者id
     private Long userId;
+    //通知标题
+    private String title;
     //通知内容
     private String content;
     //接收用户类型

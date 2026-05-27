@@ -9,9 +9,11 @@ import com.lcy.yozoraforum.wrapper.NotificationWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -36,11 +38,13 @@ public class NotificationController {
         List<NotificationVO> notificationVOList = notificationList.stream()
                 .map(notification -> {
                     NotificationVO notificationVO = new NotificationVO();
+                    notificationVO.setNotificationId(notification.getNotificationId());
                     notificationVO.setUserId(notification.getUserId());
                     notificationVO.setSenderId(notification.getSenderId());
                     notificationVO.setType(notification.getType());
                     notificationVO.setTarget(notification.getTarget());
-                    notificationVO.setContent(notification.getContent());
+//                    notificationVO.setContent(notification.getContent());
+                    notificationVO.setTitle(notification.getTitle());
                     notificationVO.setLinkUrl(notification.getLinkUrl());
                     notificationVO.setRead(notification.isRead());
                     notificationVO.setCreateTime(notification.getCreateTime());
@@ -62,4 +66,38 @@ public class NotificationController {
         List<SuperNotificationVO> superNotificationList = notificationService.selectSuperNotification();
         return Result.success(superNotificationList);
     }
+
+    /**
+     * 浏览通知详情
+     * @param notificationId
+     * @return
+     */
+    @GetMapping("/readNotification")
+    public Result<NotificationVO> readNotification(@RequestParam Long notificationId){
+        NotificationVO notificationVO = notificationService.readNotification(notificationId);
+        return Result.success(notificationVO);
+    }
+
+    /**
+     * 浏览系统通知详情
+     * @param notificationId
+     * @return
+     */
+    @GetMapping("/readSuperNotification")
+    public Result<SuperNotificationVO> readSuperNotification(@RequestParam Long notificationId){
+        SuperNotificationVO superNotificationVO = notificationService.readSuperNotification(notificationId);
+        return Result.success(superNotificationVO);
+    }
+
+
+    /**
+     * 统计未读通知数量
+     * @return
+     */
+    @GetMapping("/getAllNotificationNum")
+    public Result<Map<String,Integer>> getAllNotificationNum(){
+        Map<String,Integer> countMap = notificationService.getAllNotificationNum();
+        return Result.success(countMap);
+    }
+
 }
