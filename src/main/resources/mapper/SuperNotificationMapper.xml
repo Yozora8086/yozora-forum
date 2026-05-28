@@ -5,7 +5,7 @@
     <insert id="insertMsg">
         insert into super_notification (user_level,title,content,create_time)
         values
-        (#{userLevel},#{content},#{createTime})
+        (#{userLevel},#{title},#{content},#{createTime})
     </insert>
 
     <select id="selectContent" resultType="com.lcy.yozoraforum.vo.SuperNotificationVO">

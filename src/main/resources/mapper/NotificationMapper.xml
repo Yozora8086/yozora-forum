@@ -21,4 +21,8 @@
     <select id="getNotification" resultType="java.lang.Integer">
         select count(*) from notification where user_id = #{userId} and type = 1 and is_read = 0
     </select>
+
+    <select id="getSuperNotificationIsRead" resultType="java.lang.Integer">
+        select count(*) from notification where super_notification_id = #{superNotificationId} and user_id = #{userId}
+    </select>
 </mapper>

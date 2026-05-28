@@ -91,12 +91,19 @@ public class NotificationServiceImpl implements NotificationService {
                 .type(3)
                 .title(superNotificationVO.getTitle())
                 .superNotificationId(superNotificationVO.getSuperNotificationId())
+                .content(superNotificationVO.getContent())
                 .createTime(LocalDateTime.now())
                 .isRead(true)
                 .build();
 
+        //获取当前用户ID
+        Long userId = BaseContext.getCurrentId();
+
+        //获取当前系统通知是否已经写入数据库
+        Integer num = notificationMapper.getSuperNotificationIsRead(superNotificationVO.getSuperNotificationId(),userId);
+
         //如果已读则不用修改数据库的is_read字段
-        if (notification.isRead() == true){
+        if (num == 1){
             System.out.println("不再执行");
             return superNotificationVO;
         }
