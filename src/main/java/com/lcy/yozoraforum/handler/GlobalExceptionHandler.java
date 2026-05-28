@@ -69,4 +69,24 @@ public class GlobalExceptionHandler {
     public Result handlePermissionException(PermissionException ex){
         return Result.error("越权操作");
     }
+
+    /**
+     * 置顶帖子数量超过最大限制异常
+     * @param ex
+     * @return
+     */
+    @ExceptionHandler(MaxTopForumException.class)
+    public Result handleMaxTopForumException(MaxTopForumException ex) {
+        return Result.error("置顶帖子数量超过最大限制");
+    }
+
+    /**
+     * 置顶帖子已存在异常
+     * @param ex
+     * @return
+     */
+    @ExceptionHandler(TopForumExistException.class)
+    public Result handleToForumExistException(TopForumExistException ex) {
+        return Result.error("置顶帖子已存在");
+    }
 }

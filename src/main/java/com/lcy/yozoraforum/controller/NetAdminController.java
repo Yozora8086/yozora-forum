@@ -4,10 +4,7 @@ import com.lcy.yozoraforum.dto.SuperNotificationDTO;
 import com.lcy.yozoraforum.service.NetAdminService;
 import com.lcy.yozoraforum.util.Result;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/yozora/admin")
@@ -23,6 +20,17 @@ public class NetAdminController {
     @PostMapping("/superNotification")
     public Result sendAllUserNotification(@RequestBody SuperNotificationDTO superNotificationDTO){
         netAdminService.sendAllUserNotification(superNotificationDTO);
+        return Result.success();
+    }
+
+    /**
+     * 设置置顶帖子
+     * @param forumId
+     * @return
+     */
+    @PostMapping("/setTopForum")
+    public Result setTopForum(@RequestParam Long forumId){
+        netAdminService.setTopForum(forumId);
         return Result.success();
     }
 }

@@ -8,4 +8,10 @@ public interface NetAdminService {
      * @param superNotificationDTO
      */
     void sendAllUserNotification(SuperNotificationDTO superNotificationDTO);
+
+    /**
+     * 设置置顶贴子
+     * @param forumId
+     */
+    void setTopForum(Long forumId);
 }

@@ -164,5 +164,32 @@ public class ForumController {
        return Result.success(forumVoList);
    }
 
+    /**
+     * 获取置顶帖子列表
+     * @return
+     */
+   @GetMapping("/selectTopForumList")
+    public Result<List<ForumVo>> selectTopForumList(){
+       List<ForumWrapper> forumList = forumService.selectTopForumList();
+       //stream流操作,把每个 ForumWrapper 转成 ForumVo。
+       List<ForumVo> forumVoList = forumList.stream()
+               .map(forum -> {
+                   ForumVo forumVo = new ForumVo();
+                   forumVo.setForumId(forum.getForumId());
+                   forumVo.setForumTitle(forum.getForumTitle());
+                   forumVo.setForumBody(forum.getForumBody());
+                   forumVo.setForumLike(forum.getForumLike());
+                   forumVo.setCreateDate(forum.getCreateDate());
+                   forumVo.setUserId(forum.getUserId());
+                   forumVo.setTags(forum.getTags());
+                   forumVo.setForumPV(forum.getForumPV());
+                   forumVo.setForumCommentCount(forum.getForumCommentCount());
+                   forumVo.setUserName(forum.getUserName());
+                   return forumVo;
+               })
+               .collect(Collectors.toList());
+       return Result.success(forumVoList);
+   }
+
 
 }

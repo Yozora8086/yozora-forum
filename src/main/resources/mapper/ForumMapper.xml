@@ -51,4 +51,8 @@
     <select id="selectSearchAll" resultType="java.lang.Long">
         select  count(*) from forum WHERE forum_title LIKE CONCAT('%', #{body}, '%') OR forum_body  LIKE CONCAT('%', #{body}, '%')
     </select>
+
+    <select id="selectTopForumList" resultType="com.lcy.yozoraforum.wrapper.ForumWrapper">
+        select f.* from forum f join top_forum t on f.forum_id = t.forum_id order by  create_date desc
+    </select>
 </mapper>

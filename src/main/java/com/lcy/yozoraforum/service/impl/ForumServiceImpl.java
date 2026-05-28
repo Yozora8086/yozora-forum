@@ -361,6 +361,14 @@ public class ForumServiceImpl implements ForumService {
 //    }
 
 
-
-
+    /**
+     * 获取置顶帖子列表
+     * @return
+     */
+    @Override
+    public List<ForumWrapper> selectTopForumList() {
+        //查询置顶帖子列表
+        List<ForumWrapper> forumWrappersList = forumMapper.selectTopForumList();
+        return forumWrappersList;
+    }
 }

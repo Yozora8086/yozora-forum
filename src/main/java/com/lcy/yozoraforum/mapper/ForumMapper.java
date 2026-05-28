@@ -113,4 +113,10 @@ public interface ForumMapper {
      * @param pvList
      */
     void PVToMySQL(ForumPVDTO pvList);
+
+    /**
+     * 查询置顶帖子列表
+     * @return
+     */
+    List<ForumWrapper> selectTopForumList();
 }

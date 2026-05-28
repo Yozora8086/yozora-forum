@@ -55,4 +55,10 @@ public interface ForumService {
      * @return
      */
     Long selectSearchAllForum(String body);
+
+    /**
+     * 获取置顶帖子列表
+     * @return
+     */
+    List<ForumWrapper> selectTopForumList();
 }
