@@ -18,9 +18,10 @@ public class JWTUtils {
      * @param userId
      * @return
      */
-    public static String createToken(Long userId){
+    public static String createToken(Long userId,Integer userLevel){
         Map<String,Object> claims = new HashMap<>();
         claims.put("userId",userId);
+        claims.put("userLevel",userLevel);
         JwtBuilder jwtBuilder = Jwts.builder()
                 .signWith(SignatureAlgorithm.HS256,secretKey) //签发算法，设置密钥
                 .setClaims(claims) //载荷的数据

@@ -34,8 +34,12 @@ public class LoginInterceptor implements HandlerInterceptor {
         //校验令牌
 
         Claims claims = JWTUtils.checkToken(token);
+        //从令牌中获取userId
         java.lang.Number userId =(Number) claims.get("userId");
+        //从令牌中获取userLevel
+        java.lang.Number userLevel = (Number) claims.get("userLevel");
         BaseContext.setCurrentId(userId.longValue());
+        BaseContext.setCurrentLevel(userLevel.intValue());
         return true;
     }
 
@@ -52,5 +56,7 @@ public class LoginInterceptor implements HandlerInterceptor {
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
         //清理线程中的用户id
         BaseContext.removeCurrentId();
+        //清理线程中的用户权限等级
+        BaseContext.removeCurrentLevel();
     }
 }

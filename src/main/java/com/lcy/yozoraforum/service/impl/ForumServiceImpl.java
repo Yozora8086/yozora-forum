@@ -369,6 +369,12 @@ public class ForumServiceImpl implements ForumService {
     public List<ForumWrapper> selectTopForumList() {
         //查询置顶帖子列表
         List<ForumWrapper> forumWrappersList = forumMapper.selectTopForumList();
+        //遍历数据库返回的集合，因为Forum实体类缺少Tags集合
+        for (ForumWrapper forumWrapper : forumWrappersList) {
+            //将查询到tags集合存入ForumWrapper对象中
+            List<Tags> tagsList = forumTagRelationMapper.selectTags(forumWrapper.getForumId());
+            forumWrapper.setTags(tagsList);
+        }
         return forumWrappersList;
     }
 }

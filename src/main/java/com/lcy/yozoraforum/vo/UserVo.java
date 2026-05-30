@@ -14,6 +14,8 @@ public class UserVo {
     private Long userId;
     //用户昵称
     private String userName;
+    //用户权限等级
+    private Integer userLevel;
     //令牌token
     private String token;
 }

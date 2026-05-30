@@ -15,10 +15,13 @@ import com.lcy.yozoraforum.wrapper.SuperNotificationWrapper;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Service;
 
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 
 @Service
 public class NetAdminServiceImpl implements NetAdminService {
@@ -33,6 +36,10 @@ public class NetAdminServiceImpl implements NetAdminService {
     private ForumMapper forumMapper;
     @Autowired
     private TopForumMapper topForumMapper;
+    @Autowired
+    private RedisTemplate redisTemplate;
+    @Autowired
+    private DefaultRedisScript superNotificationScript;
 
     /**
      * 发送系统通知信息
@@ -41,8 +48,7 @@ public class NetAdminServiceImpl implements NetAdminService {
     @Override
     public void sendAllUserNotification(SuperNotificationDTO superNotificationDTO) {
         //获取当前操作用户的权限等级
-        Long userId = BaseContext.getCurrentId();
-        int userLevel = userMapper.selectUserLevel(userId);
+        Integer userLevel = BaseContext.getCurrentLevel();
         //判断用户是否为最高权限
         if (userLevel != 1 ){
             //不是就抛越权异常
@@ -53,6 +59,8 @@ public class NetAdminServiceImpl implements NetAdminService {
         superNotificationDTO.setCreateTime(LocalDateTime.now());
         //将系统通知信息插入数据库
         superNotificationMapper.insertMsg(superNotificationDTO);
+        //redis执行lua脚本通知：系统通知自减
+//        redisTemplate.execute(superNotificationScript, Collections.emptyList(),userId,1,1);
 
         SuperNotificationWrapper superNotificationWrapper = SuperNotificationWrapper.builder()
                 .userId(BaseContext.getCurrentId())
@@ -80,8 +88,7 @@ public class NetAdminServiceImpl implements NetAdminService {
     public void setTopForum(Long forumId) {
         Integer topForumCount = topForumMapper.getAllTopForumCount();
         //获取当前操作用户的权限等级
-        Long userId = BaseContext.getCurrentId();
-        int userLevel = userMapper.selectUserLevel(userId);
+        Integer userLevel = BaseContext.getCurrentLevel();
         //判断用户是否为最高权限
         if (userLevel != 1 ){
             //不是就抛越权异常

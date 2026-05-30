@@ -32,4 +32,11 @@ public class RedisLuaConfig {
         script.setResultType(String.class);
         return script;
     }
+
+    @Bean
+    public DefaultRedisScript superNotificationScript(){
+        DefaultRedisScript script = new DefaultRedisScript();
+        script.setLocation(new ClassPathResource("lua/superNotification.lua"));
+        return script;
+    }
 }

@@ -28,7 +28,7 @@ public class RedisConfiguration {
 
         //value 用JSON
         redisTemplate.setValueSerializer(genericJackson2JsonRedisSerializer);
-        redisTemplate.setHashValueSerializer(new StringRedisSerializer());
+        redisTemplate.setHashValueSerializer(genericJackson2JsonRedisSerializer);
 
         redisTemplate.afterPropertiesSet();
 

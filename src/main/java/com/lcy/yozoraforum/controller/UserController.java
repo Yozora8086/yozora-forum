@@ -29,13 +29,14 @@ public class UserController {
        User user = userService.login(userDTO);
 
        //生成Jwt令牌
-       String token = JWTUtils.createToken(user.getUserId());
+       String token = JWTUtils.createToken(user.getUserId(), user.getUserLevel());
         System.out.println("令牌是:"+token);
         UserVo userVo = new UserVo();
 
 
         userVo.setUserId(user.getUserId());
         userVo.setUserName(user.getUserName());
+        userVo.setUserLevel(user.getUserLevel());
         userVo.setToken(token);
        return Result.success(userVo);
     }

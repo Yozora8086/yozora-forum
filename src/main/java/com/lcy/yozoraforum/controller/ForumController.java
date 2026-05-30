@@ -185,6 +185,7 @@ public class ForumController {
                    forumVo.setForumPV(forum.getForumPV());
                    forumVo.setForumCommentCount(forum.getForumCommentCount());
                    forumVo.setUserName(forum.getUserName());
+                   forumVo.setForumCommentCount(forum.getForumCommentCount());
                    return forumVo;
                })
                .collect(Collectors.toList());
