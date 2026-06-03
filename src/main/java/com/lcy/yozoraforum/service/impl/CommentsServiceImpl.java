@@ -1,5 +1,6 @@
 package com.lcy.yozoraforum.service.impl;
 
+import com.lcy.yozoraforum.constant.RedisConstants;
 import com.lcy.yozoraforum.context.BaseContext;
 import com.lcy.yozoraforum.dto.CommentPositionDTO;
 import com.lcy.yozoraforum.dto.InsertCommentsDTO;
@@ -12,6 +13,7 @@ import com.lcy.yozoraforum.handler.NotifyWebSocketHandler;
 import com.lcy.yozoraforum.mapper.CommentsMapper;
 import com.lcy.yozoraforum.mapper.ForumMapper;
 import com.lcy.yozoraforum.mapper.NotificationMapper;
+import com.lcy.yozoraforum.mapper.UserMapper;
 import com.lcy.yozoraforum.service.CommentsService;
 import com.lcy.yozoraforum.util.CalculatePosition;
 import com.lcy.yozoraforum.util.NotificationPush;
@@ -28,10 +30,7 @@ import com.lcy.yozoraforum.entity.Comments;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -44,7 +43,6 @@ public class CommentsServiceImpl implements CommentsService {
     private ForumMapper forumMapper;
     @Autowired
     private NotificationMapper notificationMapper;
-
 
     /**
      * 用户发表评论
@@ -74,6 +72,10 @@ public class CommentsServiceImpl implements CommentsService {
 
         //插入数据库
         notificationMapper.InsertNotification(notification);
+
+        //redis执行lua脚本通知：通知自增
+        redisTemplate.opsForValue().increment(RedisConstants.NOTIFICATION_COUNT_KEY + userId,1);
+
         //WebSocket 推送通知
         NotifyWebSocketHandler.push(userId,comments.getUserId().toString() + "评论了你:" + comments.getContent());
         return comments;

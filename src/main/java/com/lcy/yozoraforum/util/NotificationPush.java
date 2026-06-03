@@ -18,10 +18,11 @@ public class NotificationPush {
      * @param content
      * @return
      */
-    public static Notification Add(Long userId,int type,int target,String content,String url){
+    public static Notification Add(Long userId,int type,Integer target,String content,String url){
         /**
          * 构建 notification 对象
          */
+        System.err.println("1");
         Notification notification = Notification.builder()
                 .userId(userId)
                 .senderId(BaseContext.getCurrentId())
@@ -31,6 +32,7 @@ public class NotificationPush {
                 .linkUrl(url)
                 .isRead(false)
                 .build();
+        System.err.println("2");
 
         return notification;
     }

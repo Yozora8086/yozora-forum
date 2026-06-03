@@ -1,6 +1,7 @@
 package com.lcy.yozoraforum.service.impl;
 
 import com.alibaba.fastjson.JSON;
+import com.lcy.yozoraforum.constant.RedisConstants;
 import com.lcy.yozoraforum.context.BaseContext;
 import com.lcy.yozoraforum.dto.SuperNotificationDTO;
 import com.lcy.yozoraforum.exception.MaxTopForumException;
@@ -22,6 +23,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
+import java.util.List;
 
 @Service
 public class NetAdminServiceImpl implements NetAdminService {
@@ -29,17 +31,11 @@ public class NetAdminServiceImpl implements NetAdminService {
     @Autowired
     private SuperNotificationMapper superNotificationMapper;
     @Autowired
-    private UserMapper userMapper;
-    @Autowired
     private RabbitTemplate rabbitTemplate;
-    @Autowired
-    private ForumMapper forumMapper;
     @Autowired
     private TopForumMapper topForumMapper;
     @Autowired
     private RedisTemplate redisTemplate;
-    @Autowired
-    private DefaultRedisScript superNotificationScript;
 
     /**
      * 发送系统通知信息
@@ -55,12 +51,25 @@ public class NetAdminServiceImpl implements NetAdminService {
            throw new PermissionException();
         }
 
+        Integer targetLevel = superNotificationDTO.getUserLevel();
+
         //设置时间戳
         superNotificationDTO.setCreateTime(LocalDateTime.now());
         //将系统通知信息插入数据库
         superNotificationMapper.insertMsg(superNotificationDTO);
-        //redis执行lua脚本通知：系统通知自减
-//        redisTemplate.execute(superNotificationScript, Collections.emptyList(),userId,1,1);
+
+
+        if (targetLevel == 3) {
+            //redis执行lua脚本通知：系统通知自减
+            redisTemplate.opsForValue().increment(RedisConstants.ALL_SUPER_NOTIFICATION_COUNT_KEY,1);
+        }
+
+        if (targetLevel == 2 || targetLevel == 1) {
+            //redis执行lua脚本通知：管理员通知自减
+            redisTemplate.opsForValue().increment(RedisConstants.ALL_SUPER_NOTIFICATION_ADMIN_COUNT_KEY,1);
+        }
+
+
 
         SuperNotificationWrapper superNotificationWrapper = SuperNotificationWrapper.builder()
                 .userId(BaseContext.getCurrentId())

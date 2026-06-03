@@ -33,8 +33,12 @@ public class NotificationServiceImpl implements NotificationService {
     @Autowired
     private RedisTemplate redisTemplate;
 
+
     @Autowired
-    private DefaultRedisScript superNotificationScript;
+    private DefaultRedisScript userNotificationScript;
+
+    @Autowired
+    private DefaultRedisScript adminNotificationScript;
 
 
     /**
@@ -80,18 +84,11 @@ public class NotificationServiceImpl implements NotificationService {
         }
 
         notificationMapper.contentRead(notificationId);
-        //获取当前用户权限等级
-        Integer userLevel = BaseContext.getCurrentLevel();
 
-        if (userLevel == 3) {
-            //redis执行lua脚本通知：系统通知自减
-            redisTemplate.execute(superNotificationScript, Collections.emptyList(),userId,0,1,userLevel);
-        }
 
-        if (userLevel == 2 || userLevel == 1) {
-            //redis执行lua脚本通知：管理员通知自减
-            redisTemplate.execute(superNotificationScript, Collections.emptyList(),userId,0,1,userLevel);
-        }
+        //redis执行lua脚本通知：通知自减
+        redisTemplate.opsForValue().decrement("notification:count:" + userId,1);
+
         return notificationVO;
     }
 
@@ -135,12 +132,12 @@ public class NotificationServiceImpl implements NotificationService {
 
         if (userLevel == 3) {
             //redis执行lua脚本通知：系统通知自减
-            redisTemplate.execute(superNotificationScript, Collections.emptyList(),userId,0,0,userLevel);
+            redisTemplate.opsForValue().increment("superNotification:count:" + userId,1);
         }
 
         if (userLevel == 2 || userLevel == 1) {
             //redis执行lua脚本通知：管理员系统通知自减
-            redisTemplate.execute(superNotificationScript, Collections.emptyList(),userId,0,0,userLevel);
+            redisTemplate.opsForValue().increment("superNotification:admin:count:" + userId,1);
         }
 
         return superNotificationVO;
@@ -154,50 +151,99 @@ public class NotificationServiceImpl implements NotificationService {
     public Map<String,Integer> getAllNotificationNum() {
         //获取当前用户id
         Long userId= BaseContext.getCurrentId();
-        //获取缓存的通知数量集合
-        Map<String,Object> map = redisTemplate.opsForHash().entries(RedisConstants.NOTIFICATION_ALL_COUNT_KEY + userId);
-        Map<String,Integer> countResultMap = new HashMap<>();
-        //类型转换
-        map.forEach((k,v) -> {
-            countResultMap.put(
-                    String.valueOf(k),
-                    Integer.valueOf(v.toString())
-            );
-        });
+        //获取当前用户权限等级
+        Integer userLevel = BaseContext.getCurrentLevel();
+        //获取缓存的通知数量
+        Object notificationObj = redisTemplate.opsForValue().get(RedisConstants.NOTIFICATION_COUNT_KEY + userId);
+        Object superNotificationObj = null;
+        if ( userLevel == 3) {
+            //获取缓存的系统通知数量
+            superNotificationObj = redisTemplate.opsForValue().get(RedisConstants.SUPER_NOTIFICATION_COUNT_KEY + userId);
+        } else {
+            superNotificationObj = redisTemplate.opsForValue().get(RedisConstants.ADMIN_SUPER_NOTIFICATION_COUNT_KEY + userId);
+        }
+
+        //获取普通用户权限级别的所有系统的通知
+        Object allUserSuperNotificationCountObj = redisTemplate.opsForValue().get(RedisConstants.ALL_SUPER_NOTIFICATION_COUNT_KEY);
+        //获取普通管理员权限级别的所有系统的通知
+        Object allAdminSuperNotificationCountObj = redisTemplate.opsForValue().get(RedisConstants.ALL_SUPER_NOTIFICATION_ADMIN_COUNT_KEY);
+
+        Map<String,Integer> countMap = new HashMap<>();
+
 
         //判断是否通知缓存是否为空，如果为空缓存到redis
-        if (countResultMap.isEmpty()){
+        if (notificationObj == null && superNotificationObj == null){
+
             //查询普通通知未读数量
             Integer notificationCount = notificationMapper.getNotification(userId);
 
-            //查询系统通知未读数量
-            Integer superNotification = superNotificationMapper.getSystemNotification(userId);
+            //查询系统通知已读数量
+            Integer superNotificationCount = superNotificationMapper.getSystemNotification2(userId);
 
-            //创建map集合
-            Map<String,Integer> countMap = new HashMap<>();
-            //将各项未读通知加入map集合
-            countMap.put("notificationCount",notificationCount);
-            countMap.put("superNotificationCount",superNotification);
-            countMap.put("allNotificationCount",notificationCount + superNotification);
+            /**
+             * 各权限等级所有通知
+             */
+            //查询所有普通用户权限系统通知数量
+            Integer allUserSuperNotificationCount = superNotificationMapper.getAllUserSuperNotificationCount();
+            //查询所有管理员权限系统通知数量
+            Integer allAdminSuperNotificationCount = superNotificationMapper.getAllAdminSuperNotificationCount();
 
-            //获取当前用户权限等级
-            Integer userLevel = BaseContext.getCurrentLevel();
-
-            if (userLevel == 3){
-                //普通用户通知数量缓存到redis
-                redisTemplate.opsForHash().putAll(RedisConstants.NOTIFICATION_ALL_COUNT_KEY + userId,countMap);
-            }
-
+            //判断用户权限
             if (userLevel == 2 || userLevel == 1) {
                 //管理员通知数量缓存到redis
-                redisTemplate.opsForHash().putAll(RedisConstants.ADMIN_NOTIFICATION_ALL_COUNT_KEY + userId,countMap);
+                redisTemplate.execute(adminNotificationScript,Collections.emptyList(),userId,notificationCount,allAdminSuperNotificationCount,superNotificationCount);
+                countMap.put("NotificationCount",notificationCount);
+                countMap.put("superNotificationCount",allAdminSuperNotificationCount - superNotificationCount);
+                countMap.put("allNotificationCount",notificationCount + (allAdminSuperNotificationCount - superNotificationCount));
+            } else {
+                //所有用户通知数量缓存到redis
+                redisTemplate.execute(userNotificationScript,Collections.emptyList(),userId,notificationCount, allUserSuperNotificationCount,superNotificationCount);
+                countMap.put("NotificationCount",notificationCount);
+                countMap.put("superNotificationCount",allUserSuperNotificationCount - superNotificationCount);
+                countMap.put("allNotificationCount",notificationCount + (allUserSuperNotificationCount - superNotificationCount));
             }
 
             return countMap;
         }
 
+
+        /**
+         *  Obj转Integer
+         */
+        Integer notification =
+                notificationObj == null
+                        ? 0
+                        : Integer.valueOf(notificationObj.toString());
+
+        Integer superNotification =
+                superNotificationObj == null
+                        ? 0
+                        : Integer.valueOf(superNotificationObj.toString());
+
+        Integer allUserSuperNotificationCount =
+                allUserSuperNotificationCountObj == null
+                        ? 0
+                        : Integer.valueOf(allUserSuperNotificationCountObj.toString());
+
+        Integer allAdminSuperNotificationCount =
+                allAdminSuperNotificationCountObj == null
+                        ? 0
+                        : Integer.valueOf(allAdminSuperNotificationCountObj.toString());
+
+        //判断用户权限
+        if (userLevel == 2 || userLevel == 1) {
+            countMap.put("NotificationCount",notification);
+            countMap.put("superNotificationCount",allAdminSuperNotificationCount - superNotification);
+            countMap.put("allNotificationCount",notification + (allAdminSuperNotificationCount - superNotification));
+        } else {
+            countMap.put("NotificationCount",notification);
+            countMap.put("superNotificationCount",allUserSuperNotificationCount - superNotification);
+            countMap.put("allNotificationCount",notification + (allUserSuperNotificationCount - superNotification));
+        }
+
+
         //不为空就直接返回集合
-        return countResultMap;
+        return countMap;
 
     }
 }

@@ -33,10 +33,25 @@ public class RedisLuaConfig {
         return script;
     }
 
+    /**
+     * 管理通知脚本
+     * @return
+     */
     @Bean
-    public DefaultRedisScript superNotificationScript(){
+    public DefaultRedisScript adminNotificationScript(){
         DefaultRedisScript script = new DefaultRedisScript();
-        script.setLocation(new ClassPathResource("lua/superNotification.lua"));
+        script.setLocation(new ClassPathResource("lua/adminNotification.lua"));
+        return script;
+    }
+
+    /**
+     * 普通用户通知脚本
+     * @return
+     */
+    @Bean
+    public DefaultRedisScript userNotificationScript(){
+        DefaultRedisScript script = new DefaultRedisScript();
+        script.setLocation(new ClassPathResource("lua/userNotification.lua"));
         return script;
     }
 }

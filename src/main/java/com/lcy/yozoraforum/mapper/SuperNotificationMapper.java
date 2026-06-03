@@ -32,9 +32,29 @@ public interface SuperNotificationMapper {
     SuperNotificationVO selectContent(Long notificationId);
 
     /**
-     * 获取系统未读通知数量
+     * 获取系统未读通知数量（反查）
      * @param userId
      * @return
      */
     Integer getSystemNotification(Long userId);
+
+    /**
+     * 获取系统已读通知数量(正查)
+     */
+    @Select("select count(*) from notification where user_id = #{userId} and type = 3 and is_read = 1")
+    Integer getSystemNotification2(Long userId);
+
+    /**
+     * 获取普通用户级别权限的所有系统通知数量
+     * @return
+     */
+    @Select("select count(*) from super_notification where user_level = 3")
+    Integer getAllUserSuperNotificationCount();
+
+    /**
+     * 获取管理员级别权限的所有系统通知数量
+     * @return
+     */
+    @Select("select count(*) from super_notification")
+    Integer getAllAdminSuperNotificationCount();
 }

@@ -16,7 +16,7 @@ public class NotificationVO {
     private Long userId;
     //触发者（发起者，其他用户或者系统）
     private Long senderId;
-    //通知类型 如评论 = 1，点赞 = 2，系统 = 3
+    //通知类型 如评论 = 1，点赞 = 2，系统 = 3，私信 = 4
     private int type;
     //被操作对象类型 如帖子 = 1，资源 = 2，评论 =3
     private int target;

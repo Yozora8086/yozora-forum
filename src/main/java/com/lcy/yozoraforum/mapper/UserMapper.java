@@ -9,6 +9,8 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
+import java.util.List;
+
 @Mapper
 public interface UserMapper {
     /**
@@ -66,4 +68,11 @@ public interface UserMapper {
      */
     @Select("select user_level from user where user_id = #{userId}")
     int selectUserLevel(Long userId);
+
+    /**
+     * 查询所有权限等级为管理员级的用户id
+     * @return
+     */
+    @Select("select user_id from user where user_level != 3")
+    List<Long> selectAllAdminUser();
 }
