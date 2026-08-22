@@ -8,16 +8,24 @@
 local forumId = ARGV[1]
 --缓存的帖子信息json
 local forumJson = ARGV[2]
---缓存的帖子浏览量
-local forumPV = ARGV[3]
+----缓存的帖子浏览量
+--local forumPV = ARGV[3]
 --缓存过期时间
-local TTL = ARGV[4]
+local TTL = ARGV[3]
+--帖子缓存阈值key
+local cacheThresholdKey = ARGV[4]
+--帖子缓存阈值value(判断是否缓存帖子)
+local num = tonumber(ARGV[5])
 
 local cacheForumKey = 'forum:cache:' .. forumId
 local cacheForumPVKey = 'forum:cachePV:' .. forumId
 
+redis.call("INCR",cacheForumPVKey)
+if num >= 100 then
+    redis.call("SET",cacheThresholdKey,1,"EX",TTL)
+    redis.call("EXPIRE",cacheForumPVKey,TTL)
+    redis.call("SET",cacheForumKey,forumJson,"EX",TTL)
+end
 
-redis.call("SET",cacheForumKey,forumJson,"EX",TTL)
-redis.call("HSET",cacheForumPVKey,"PV",forumPV)
-redis.call("EXPIRE",cacheForumPVKey,TTL)
+
 

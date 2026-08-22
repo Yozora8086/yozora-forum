@@ -31,6 +31,8 @@ public class Forum {
     private Long forumCommentCount;
     //帖子浏览数
     private Long forumPV;
+    //帖子热度
+    private Integer forumHot;
 
 
 

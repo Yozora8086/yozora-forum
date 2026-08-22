@@ -12,4 +12,9 @@ public class RedisConstants {
     //管理员系统已读通知数量KEY
     public static final String ADMIN_SUPER_NOTIFICATION_COUNT_KEY = "superNotification:admin:count:";
 
+    //帖子缓存阈值KEY
+    public static final String FORUM_CACHE_THRESHOLD = "forum:cache:threshold:";
+    //帖子浏览量缓存KEY
+    public static final String FORUM_CACHE_PV = "forum:cachePV:";
+
 }

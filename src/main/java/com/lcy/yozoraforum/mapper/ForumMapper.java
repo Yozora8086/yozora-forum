@@ -15,9 +15,9 @@ public interface ForumMapper {
      * 插入用户发布的论坛帖子
      * @param forum
      */
-    @Insert("insert into forum (forum_title,forum_body,forum_like,create_date,update_date,user_id,forum_pv)" +
+    @Insert("insert into forum (forum_title,forum_body,forum_like,create_date,update_date,user_id,forum_pv,forum_hot)" +
             "values " +
-            "(#{forumTitle},#{forumBody},#{forumLike},#{createDate},#{updateDate},#{userId},0)")
+            "(#{forumTitle},#{forumBody},#{forumLike},#{createDate},#{updateDate},#{userId},0,#{forumHot})")
     @Options(useGeneratedKeys = true,keyProperty = "forumId",keyColumn = "forum_id")
     void insert(Forum forum);
 
@@ -119,4 +119,12 @@ public interface ForumMapper {
      * @return
      */
     List<ForumWrapper> selectTopForumList();
+
+    /**
+     * 查询帖子浏览量
+     * @param forumId
+     * @return
+     */
+    @Select("select forum_pv from forum where forum_id = #{forumId}")
+    Long selectForumPV(Long forumId);
 }

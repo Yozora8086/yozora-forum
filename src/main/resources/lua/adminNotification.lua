@@ -18,6 +18,6 @@ local allAdminSuperNotificationCountKey = "allSuperNotification:admin:count"
 -- 管理员已读用户权限系统通知key
 local adminSuperNotificationKey = "superNotification:admin:count:" .. userId
 
-redis.call("SET",adminNotificationCountKey,adminNotificationCount)
+redis.call("SET",adminNotificationCountKey,adminNotificationCount,"EX",3600)
 redis.call("SET",allAdminSuperNotificationCountKey,allAdminSuperNotificationCount)
-redis.call("SET",adminSuperNotificationKey,adminSuperNotificationCount)
+redis.call("SET",adminSuperNotificationKey,adminSuperNotificationCount,"EX",3600)

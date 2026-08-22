@@ -20,7 +20,7 @@ local superNotificationKey = "superNotification:count:" .. userId
 local allUserSuperNotificationCountKey = "allSuperNotification:count"
 
 
-redis.call("SET",notificationCountKey,notificationCount)
+redis.call("SET",notificationCountKey,notificationCount,"EX",3600)
 redis.call("SET",allUserSuperNotificationCountKey,allUserSuperNotificationCount)
-redis.call("SET",superNotificationKey,superNotification)
+redis.call("SET",superNotificationKey,superNotification,"EX",3600)
 

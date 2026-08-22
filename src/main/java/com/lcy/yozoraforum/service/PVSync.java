@@ -34,7 +34,7 @@ public class PVSync {
 
         while (cursor.hasNext()){
             String key = cursor.next();
-            String PV = (String) redisTemplate.opsForHash().get(key,"PV");
+            String PV = (String) redisTemplate.opsForValue().get(key);
             if (PV == null){
                 continue;
             }

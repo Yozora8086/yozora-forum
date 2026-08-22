@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class NotificationServiceImpl implements NotificationService {
@@ -39,6 +40,58 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Autowired
     private DefaultRedisScript adminNotificationScript;
+
+    /**
+     * 已读系统通知缓存重建
+     * @param userId
+     * @param key 已读系统通知总数的key
+     * @return
+     */
+    private Boolean reBuildReadSuperNotificationCache(Long userId,String key){
+        //获取缓存，判断是否需要重建
+        Object superNotification = redisTemplate.opsForValue().get(key + userId);
+        Integer realSuperNotification = null;
+        //如果缓存未null,则缓存过期需要重建
+        if (superNotification == null){
+            //线程获取互斥锁
+            Boolean flag = redisTemplate.opsForValue().setIfAbsent(key + "lock:" + userId, 1,10, TimeUnit.SECONDS);
+
+            //判断线程是否已经拿到互斥锁
+            if (Boolean.TRUE.equals(flag)) {   //拿到了
+                try {
+                    //查询系统通知已读数量
+                    realSuperNotification = superNotificationMapper.getSystemNotification2(userId);
+                    //缓存重建
+                    redisTemplate.opsForValue().set(key + userId,realSuperNotification,1,TimeUnit.HOURS);
+                    return true;
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                } finally {
+                    //释放锁
+                    redisTemplate.delete(key + "lock:" + userId );
+                }
+            }
+
+            // 没拿到锁：等别人重建
+            for (int i = 0; i < 3; i++) {
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+                //再次获取缓存
+                Object retry = redisTemplate.opsForValue().get(key + userId);
+                //如果缓存不为空，则缓存重建完成
+                if (retry != null) {
+                    return true;
+                }
+            }
+
+            throw new RuntimeException("系统通知计数缓存重建失败");
+
+        }
+        return null;
+    }
 
 
     /**
@@ -130,14 +183,31 @@ public class NotificationServiceImpl implements NotificationService {
         //获取当前用户权限等级
         Integer userLevel = BaseContext.getCurrentLevel();
 
+
+
         if (userLevel == 3) {
-            //redis执行lua脚本通知：系统通知自减
-            redisTemplate.opsForValue().increment("superNotification:count:" + userId,1);
+            //获取缓存是否已经重建
+            Boolean flag = reBuildReadSuperNotificationCache(userId, RedisConstants.SUPER_NOTIFICATION_COUNT_KEY);
+            //是的话，什么也不执行
+            if (Boolean.TRUE.equals(flag)){
+                System.out.println("66666666666");
+            } else { //不是的话，自增
+                //系统通知自增
+                redisTemplate.opsForValue().increment(RedisConstants.SUPER_NOTIFICATION_COUNT_KEY + userId,1);
+            }
         }
 
         if (userLevel == 2 || userLevel == 1) {
-            //redis执行lua脚本通知：管理员系统通知自减
-            redisTemplate.opsForValue().increment("superNotification:admin:count:" + userId,1);
+            //获取缓存是否已经重建
+            Boolean flag = reBuildReadSuperNotificationCache(userId, RedisConstants.ADMIN_SUPER_NOTIFICATION_COUNT_KEY);
+            //是的话，什么也不执行
+            if (Boolean.TRUE.equals(flag)){
+                System.out.println("66666666");
+            } else { //不是的话，自增
+                //管理员系统通知自增
+                redisTemplate.opsForValue().increment(RedisConstants.ADMIN_SUPER_NOTIFICATION_COUNT_KEY + userId,1);
+            }
+
         }
 
         return superNotificationVO;
@@ -172,7 +242,7 @@ public class NotificationServiceImpl implements NotificationService {
 
 
         //判断是否通知缓存是否为空，如果为空缓存到redis
-        if (notificationObj == null && superNotificationObj == null){
+        if (notificationObj == null || superNotificationObj == null){
 
             //查询普通通知未读数量
             Integer notificationCount = notificationMapper.getNotification(userId);

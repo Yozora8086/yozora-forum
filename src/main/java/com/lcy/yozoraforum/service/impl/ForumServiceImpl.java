@@ -2,6 +2,7 @@ package com.lcy.yozoraforum.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
 import com.aliyun.oss.OSS;
+import com.lcy.yozoraforum.constant.RedisConstants;
 import com.lcy.yozoraforum.context.BaseContext;
 import com.lcy.yozoraforum.dto.ForumDTO;
 import com.lcy.yozoraforum.dto.ShowForumDTO;
@@ -37,6 +38,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -51,6 +53,8 @@ public class ForumServiceImpl implements ForumService {
     private TagsMapper tagsMapper;
     @Autowired
     private StringRedisTemplate redisTemplate;
+//    @Autowired
+//    private RedisTemplate<String,Object> redisTemplate;
 //    @Autowired
 //    private RedisTemplate<String,Object> redis;
     @Autowired
@@ -89,6 +93,8 @@ public class ForumServiceImpl implements ForumService {
         forum.setForumLike(0);
         forum.setCreateDate(LocalDateTime.now());
         forum.setUpdateDate(LocalDateTime.now());
+        //设置帖子初始热度
+        forum.setForumHot(1);
 
         //查询集合中所有分类标签对应的id
         List<Long> tagsId = tagsMapper.selectTags(tagsList);
@@ -191,67 +197,64 @@ public class ForumServiceImpl implements ForumService {
      */
     @Override
     public ForumWrapper showForum(Long forumId) {
+        //获取帖子热度
+        Object o = redisTemplate.opsForValue().get(RedisConstants.FORUM_CACHE_THRESHOLD + forumId);
 
-        String forumJson = redisTemplate.execute(checkTTLScript, Collections.emptyList(), forumId.toString(), "3600", "86400");
-
-        //缓存命中直接返回
-        if (forumJson != null){
-            ForumWrapper forumWrapper = JSONObject.parseObject(forumJson, ForumWrapper.class);
-            return forumWrapper;
-        }
-
-        //缓存未命中
-        String lockKey = "lock:forum:" + forumId.toString();
-        //获取互斥锁
-        boolean result = redisLockUtil.tryLock(lockKey);
-        if (result == true){
-                //根据帖子id查询帖子
-                ForumWrapper forumWrapper = forumMapper.selectForum(forumId);
-                //根据帖子id查询帖子所携带的资源
-                List<String> forumResourceUrlList = forumResourceUrlMapper.select(forumId);
-
-                //帖子浏览量自增
-//                forumMapper.updatePV(forumId);
-
-
-//                for (String s : forumResourceUrlList) {
-//                    System.out.println("------------------------------"+s);
-//                }
-
-                //根据帖子id查询当前帖子所添加的分类标签
-                List<Tags> tagsList = forumTagRelationMapper.selectTags(forumId);
-
-                //将帖子标签挂载到帖子对象中
-                forumWrapper.setTags(tagsList);
-                //将帖子资源挂载到帖子对象中
-                forumWrapper.setUrl(forumResourceUrlList);
-
-                //将查询到的数据缓存到redis中
-
-                String jsonString = JSONObject.toJSONString(forumWrapper);
-
-                //声明TTL(单位s)
-                Integer ttl = 86400;
-
-                //执行lua脚本
-                redisTemplate.execute(cacheForumAndForumPVScript,Collections.emptyList(),forumId.toString(),jsonString,forumWrapper.getForumPV().toString(),ttl.toString());
-
-    //          disTemplate.opsForValue().set("forum:cache:" + forumId,jsonString);
-
-                //释放锁
-                redisLockUtil.unLock(lockKey);
-
-                return forumWrapper;
+        //若不存在，redis生成当前阈值记录，默认为0
+        if (o ==  null){
+            //当前浏览量+1
+            Long countPV = forumMapper.selectForumPV(forumId) + 1;
+            //生成当前帖子热度数据
+            redisTemplate.opsForValue().set(RedisConstants.FORUM_CACHE_THRESHOLD + forumId,"1",600,TimeUnit.SECONDS);
+            //生成当前帖子浏览量
+            redisTemplate.opsForValue().set(RedisConstants.FORUM_CACHE_PV + forumId,countPV.toString(),600,TimeUnit.SECONDS);
         } else {
-            try {
-                Thread.sleep(50);
-            } catch (Exception e){
+            System.err.println("6666");
+            Integer num = Integer.valueOf(o.toString());
 
-            }
-            showForum(forumId);
+
+            //根据帖子id查询帖子
+            ForumWrapper forumWrapper = forumMapper.selectForum(forumId);
+            //根据帖子id查询帖子所携带的资源
+            List<String> forumResourceUrlList = forumResourceUrlMapper.select(forumId);
+
+            //根据帖子id查询当前帖子所添加的分类标签
+            List<Tags> tagsList = forumTagRelationMapper.selectTags(forumId);
+
+            //将帖子标签挂载到帖子对象中
+            forumWrapper.setTags(tagsList);
+            //将帖子资源挂载到帖子对象中
+            forumWrapper.setUrl(forumResourceUrlList);
+
+            System.out.println("数据" + forumWrapper);
+            //将查询到的数据缓存到redis中
+
+            String jsonString = JSONObject.toJSONString(forumWrapper);
+
+            //声明TTL(单位s)
+            Integer ttl = 1800;
+
+            //执行lua脚本
+            redisTemplate.execute(cacheForumAndForumPVScript,
+                    Collections.emptyList(),
+                    forumId.toString(),
+                    jsonString,
+                    ttl.toString(),
+                    RedisConstants.FORUM_CACHE_THRESHOLD + forumId,
+                    num.toString()
+            );
+            System.err.println("10086");
+
+            //当前帖子热度+1
+            redisTemplate.opsForValue().increment(RedisConstants.FORUM_CACHE_THRESHOLD + forumId,1);
+
+            return forumWrapper;
+
         }
+        ForumWrapper forumWrapper = forumMapper.selectForum(forumId);
 
-        return null;
+
+        return forumWrapper;
 
     }
 
