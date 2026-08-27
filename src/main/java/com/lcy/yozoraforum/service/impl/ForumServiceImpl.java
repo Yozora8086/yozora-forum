@@ -2,6 +2,7 @@ package com.lcy.yozoraforum.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
 import com.aliyun.oss.OSS;
+import com.google.common.hash.BloomFilter;
 import com.lcy.yozoraforum.constant.RedisConstants;
 import com.lcy.yozoraforum.context.BaseContext;
 import com.lcy.yozoraforum.dto.ForumDTO;
@@ -22,6 +23,7 @@ import com.lcy.yozoraforum.util.RedisLockUtil;
 import com.lcy.yozoraforum.vo.CommentsVO;
 import com.lcy.yozoraforum.vo.ForumVo;
 import com.lcy.yozoraforum.wrapper.ForumWrapper;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.ParameterResolutionDelegate;
@@ -44,6 +46,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class ForumServiceImpl implements ForumService {
     @Autowired
     private ForumMapper forumMapper;
@@ -67,9 +70,11 @@ public class ForumServiceImpl implements ForumService {
     private DefaultRedisScript<String> checkTTLScript;
     @Autowired
     private RedisLockUtil redisLockUtil;
-
     @Autowired
     private OSS ossClient;
+
+
+    private final BloomFilter<Long> bloomFilter;
 
     private final String bucketName = "yozora-forum";
 
@@ -197,6 +202,14 @@ public class ForumServiceImpl implements ForumService {
      */
     @Override
     public ForumWrapper showForum(Long forumId) {
+
+        //判断查询的帖子是否存在
+        if (bloomFilter.mightContain(forumId)){
+
+        } else {
+            throw new ForumNotFindException("当前帖子不存在（布隆）");
+        }
+
         //获取帖子热度
         Object o = redisTemplate.opsForValue().get(RedisConstants.FORUM_CACHE_THRESHOLD + forumId);
 
@@ -380,4 +393,5 @@ public class ForumServiceImpl implements ForumService {
         }
         return forumWrappersList;
     }
+
 }

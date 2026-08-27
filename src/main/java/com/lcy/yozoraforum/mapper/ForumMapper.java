@@ -127,4 +127,11 @@ public interface ForumMapper {
      */
     @Select("select forum_pv from forum where forum_id = #{forumId}")
     Long selectForumPV(Long forumId);
+
+    /**
+     * 查询所有帖子的帖子id
+     * @return
+     */
+    @Select("select forum_id from forum")
+    List<Long> selectAllForumId();
 }

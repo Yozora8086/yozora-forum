@@ -14,6 +14,7 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.redis.core.Cursor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ScanOptions;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -31,7 +32,7 @@ import java.util.Set;
 @Service
 public class LikeSyncTask {
     @Autowired
-    private RedisTemplate<String,Object> redisTemplate;
+    private StringRedisTemplate redisTemplate;
     @Autowired
     private ForumMapper forumMapper;
     @Autowired

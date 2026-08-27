@@ -89,4 +89,14 @@ public class GlobalExceptionHandler {
     public Result handleToForumExistException(TopForumExistException ex) {
         return Result.error("置顶帖子已存在");
     }
+
+    /**
+     * 请求过于频繁异常
+     * @param ex
+     * @return
+     */
+    @ExceptionHandler(TooManyRequestException.class)
+    public Result handleTooManyRequestException(TooManyRequestException ex){
+        return Result.error("请求过于频繁，请1分钟后重试");
+    }
 }

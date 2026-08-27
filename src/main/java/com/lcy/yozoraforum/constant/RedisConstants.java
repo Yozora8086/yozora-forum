@@ -17,4 +17,7 @@ public class RedisConstants {
     //帖子浏览量缓存KEY
     public static final String FORUM_CACHE_PV = "forum:cachePV:";
 
+    //当前用户1分钟发起请求的次数
+    public static final String USER_REQUEST_COUNT = "request:count:";
+
 }
