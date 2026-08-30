@@ -22,7 +22,6 @@ public class NotificationPush {
         /**
          * 构建 notification 对象
          */
-        System.err.println("1");
         Notification notification = Notification.builder()
                 .userId(userId)
                 .senderId(BaseContext.getCurrentId())
@@ -32,7 +31,6 @@ public class NotificationPush {
                 .linkUrl(url)
                 .isRead(false)
                 .build();
-        System.err.println("2");
 
         return notification;
     }

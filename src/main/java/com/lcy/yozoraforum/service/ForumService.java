@@ -63,4 +63,12 @@ public interface ForumService {
     List<ForumWrapper> selectTopForumList();
 
 
+    /**
+     * 根据分类标签查询帖子
+     * @param tagIds
+     * @return
+     */
+    List<ForumWrapper> selectForumByTag(List<Long> tagIds);
+
+
 }

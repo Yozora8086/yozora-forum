@@ -25,7 +25,8 @@
     </select>
 
     <select id="selectForum" resultType="com.lcy.yozoraforum.wrapper.ForumWrapper">
-        select f.*,u.user_name,flu.status from forum f left join user u on f.user_id = u.user_id  left join forum_like_user_relation flu on f.forum_id = flu.forum_id where f.forum_id = #{forumId}
+        select f.*,u.user_name,flu.status from forum f left join user u on f.user_id = u.user_id
+            left join forum_like_user_relation flu on f.forum_id = flu.forum_id where f.forum_id = #{forumId}
     </select>
 
     <select id="showSearchForum" resultType="com.lcy.yozoraforum.wrapper.ForumWrapper">
@@ -59,4 +60,8 @@
             left join comments c on f.forum_id = c.forum_id group by f.forum_id
             order by  create_date desc
     </select>
+
+
+
+
 </mapper>

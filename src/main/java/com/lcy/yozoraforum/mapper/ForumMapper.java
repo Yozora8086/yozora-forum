@@ -134,4 +134,6 @@ public interface ForumMapper {
      */
     @Select("select forum_id from forum")
     List<Long> selectAllForumId();
+
+
 }

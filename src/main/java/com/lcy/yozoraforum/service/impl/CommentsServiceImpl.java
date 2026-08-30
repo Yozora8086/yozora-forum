@@ -92,12 +92,8 @@ public class CommentsServiceImpl implements CommentsService {
         int offset = (page - 1) * pageSize;
         //分页查询10条父评论
         List<CommentsVO> commentsVOList = commentsMapper.getForumAllComments(forumId,offset,pageSize);
-        for (CommentsVO commentsVO : commentsVOList) {
-            System.out.println(commentsVO);
-        }
         //查询返回父评论所携带的子评论
         List<CommentsVO> commentsChildList = commentsMapper.getChildComments(commentsVOList);
-        System.out.println("子评论-------------------------------" + commentsChildList);
 
         for (CommentsVO commentsVO : commentsVOList) {
             List<CommentsVO> commentsVOS = new ArrayList<>();
@@ -108,26 +104,6 @@ public class CommentsServiceImpl implements CommentsService {
             }
             commentsVO.setComments(commentsVOS);
         }
-
-        //建立 commentId -> CommentsVO 的索引表
-//        Map<Long, CommentsVO> map = commentsVOList.stream()
-//                .collect(Collectors.toMap(CommentsVO::getCommentId, c -> c));
-//
-//        //组装树
-//        List<CommentsVO> tree = new ArrayList<>();
-//
-//        for (CommentsVO commentsVO : commentsVOList) {
-//            if (commentsVO.getParentId() == 0L) {
-//                // 顶级评论
-//                tree.add(commentsVO);
-//            } else {
-//                // 子评论，挂到父评论下
-//                CommentsVO parent = map.get(commentsVO.getParentId());
-//                if (parent != null) {
-//                    parent.getComments().add(commentsVO);
-//                }
-//            }
-//        }
 
         return commentsVOList;
     }

@@ -43,7 +43,6 @@ public class NotificationController {
                     notificationVO.setSenderId(notification.getSenderId());
                     notificationVO.setType(notification.getType());
                     notificationVO.setTarget(notification.getTarget());
-//                    notificationVO.setContent(notification.getContent());
                     notificationVO.setTitle(notification.getTitle());
                     notificationVO.setLinkUrl(notification.getLinkUrl());
                     notificationVO.setRead(notification.isRead());

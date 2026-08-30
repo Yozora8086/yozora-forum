@@ -70,7 +70,6 @@ public class UserServiceImpl implements UserService {
         user.setUserLevel(1);
         //设置用户注册时间
         user.setRegisterTime(LocalDateTime.now());
-        System.out.println(user);
 
         userMapper.insertUser(user);
 

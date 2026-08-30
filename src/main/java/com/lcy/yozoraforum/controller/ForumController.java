@@ -115,7 +115,7 @@ public class ForumController {
               .status(forumVo.getStatus())
               .build();
 
-      //返沪
+      //返回
       return Result.success(forumMsgVO);
    }
 
@@ -192,6 +192,34 @@ public class ForumController {
        return Result.success(forumVoList);
    }
 
+    /**
+     * 根据分类标签查询帖子
+     * @param tagIds
+     * @return
+     */
+   @GetMapping("/selectForumByTag")
+    public Result<List<ForumVo>> selectForumByTag(@RequestBody List<Long> tagIds){
+       List<ForumWrapper> forumList = forumService.selectForumByTag(tagIds);
+       //stream流操作,把每个 ForumWrapper 转成 ForumVo。
+       List<ForumVo> forumVoList = forumList.stream()
+               .map(forum -> {
+                   ForumVo forumVo = new ForumVo();
+                   forumVo.setForumId(forum.getForumId());
+                   forumVo.setForumTitle(forum.getForumTitle());
+                   forumVo.setForumBody(forum.getForumBody());
+                   forumVo.setForumLike(forum.getForumLike());
+                   forumVo.setCreateDate(forum.getCreateDate());
+                   forumVo.setUserId(forum.getUserId());
+                   forumVo.setTags(forum.getTags());
+                   forumVo.setForumPV(forum.getForumPV());
+                   forumVo.setForumCommentCount(forum.getForumCommentCount());
+                   forumVo.setUserName(forum.getUserName());
+                   forumVo.setForumCommentCount(forum.getForumCommentCount());
+                   return forumVo;
+               })
+               .collect(Collectors.toList());
+       return Result.success(forumVoList);
+   }
 
 
 }

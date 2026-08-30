@@ -56,10 +56,6 @@ public class ForumServiceImpl implements ForumService {
     private TagsMapper tagsMapper;
     @Autowired
     private StringRedisTemplate redisTemplate;
-//    @Autowired
-//    private RedisTemplate<String,Object> redisTemplate;
-//    @Autowired
-//    private RedisTemplate<String,Object> redis;
     @Autowired
     private CommentsService commentsService;
     @Autowired
@@ -159,21 +155,6 @@ public class ForumServiceImpl implements ForumService {
         int offset = (page - 1) * pageSize;
         //执行查询
         List<ForumWrapper> forumWrappersList = forumMapper.showForumList(offset,pageSize);
-        //stream流操作,把每个 Forum 转成 ForumWrapper。
-//        List<ForumWrapper> forumWrapperList = forumList.stream()
-//                .map(forum -> {
-//                    ForumWrapper forumWrapper = new ForumWrapper();
-//                    forumWrapper.setForumId(forum.getForumId());
-//                    forumWrapper.setForumTitle(forum.getForumTitle());
-//                    forumWrapper.setForumBody(forum.getForumBody());
-//                    forumWrapper.setForumLike(forum.getForumLike());
-//                    forumWrapper.setCreateDate(forum.getCreateDate());
-//                    forumWrapper.setUserId(forum.getUserId());
-//                    forumWrapper.setForumCommentCount(forum.getForumCommentCount());
-//                    forumWrapper.setForumPV(forum.getForumPV());
-//                    return forumWrapper;
-//                })
-//                .collect(Collectors.toList());
 
         //遍历数据库返回的集合，因为Forum实体类缺少Tags集合
         for (ForumWrapper forumWrapper : forumWrappersList) {
@@ -222,7 +203,6 @@ public class ForumServiceImpl implements ForumService {
             //生成当前帖子浏览量
             redisTemplate.opsForValue().set(RedisConstants.FORUM_CACHE_PV + forumId,countPV.toString(),600,TimeUnit.SECONDS);
         } else {
-            System.err.println("6666");
             Integer num = Integer.valueOf(o.toString());
 
 
@@ -256,7 +236,6 @@ public class ForumServiceImpl implements ForumService {
                     RedisConstants.FORUM_CACHE_THRESHOLD + forumId,
                     num.toString()
             );
-            System.err.println("10086");
 
             //当前帖子热度+1
             redisTemplate.opsForValue().increment(RedisConstants.FORUM_CACHE_THRESHOLD + forumId,1);
@@ -303,8 +282,6 @@ public class ForumServiceImpl implements ForumService {
         List<String> keys = Arrays.asList(setLikeKey,setLikeCountKey);
         List<String> args = Arrays.asList(String.valueOf(BaseContext.getCurrentId()),String.valueOf(3 * 24 * 60 * 60));
 
-        System.out.println(luaScript);
-
         Long result = null;
         try {
             //脚本执行
@@ -329,21 +306,6 @@ public class ForumServiceImpl implements ForumService {
         int offset = (page - 1) * pageSize;
         //执行查询
         List<ForumWrapper> forumWrappersList = forumMapper.showSearchForum(body,offset,pageSize);
-        //stream流操作,把每个 Forum 转成 ForumWrapper。
-//        List<ForumWrapper> forumWrapperList = forumList.stream()
-//                .map(forum -> {
-//                    ForumWrapper forumWrapper = new ForumWrapper();
-//                    forumWrapper.setForumId(forum.getForumId());
-//                    forumWrapper.setForumTitle(forum.getForumTitle());
-//                    forumWrapper.setForumBody(forum.getForumBody());
-//                    forumWrapper.setForumLike(forum.getForumLike());
-//                    forumWrapper.setCreateDate(forum.getCreateDate());
-//                    forumWrapper.setUserId(forum.getUserId());
-//                    forumWrapper.setForumCommentCount(forum.getForumCommentCount());
-//                    forumWrapper.setForumPV(forum.getForumPV());
-//                    return forumWrapper;
-//                })
-//                .collect(Collectors.toList());
 
         //遍历数据库返回的集合，因为Forum实体类缺少Tags集合
         for (ForumWrapper forumWrapper : forumWrappersList) {
@@ -366,15 +328,6 @@ public class ForumServiceImpl implements ForumService {
         return forumCount;
     }
 
-    //    /**
-//     * 获取当前帖子下所有的评论
-//     * @param showForumDTO
-//     * @return
-//     */
-//    public List<CommentsVO> getForumComments(ShowForumDTO showForumDTO){
-//        List<CommentsVO> commentsVOList = commentsService.showComment(showForumDTO);
-//        return commentsVOList;
-//    }
 
 
     /**
@@ -392,6 +345,27 @@ public class ForumServiceImpl implements ForumService {
             forumWrapper.setTags(tagsList);
         }
         return forumWrappersList;
+    }
+
+
+    /**
+     * 根据分类标签查询帖子
+     * @param tagIds
+     * @return
+     */
+    @Override
+    public List<ForumWrapper> selectForumByTag(List<Long> tagIds) {
+        //查询满足条件的帖子
+        List<ForumWrapper> forumWrapperList = forumTagRelationMapper.selectForumByTags(tagIds);
+
+        //遍历数据库返回的集合，因为Forum实体类缺少Tags集合
+        for (ForumWrapper forumWrapper : forumWrapperList) {
+            //将查询到tags集合存入ForumWrapper对象中
+            List<Tags> tagsList = forumTagRelationMapper.selectTags(forumWrapper.getForumId());
+            forumWrapper.setTags(tagsList);
+
+        }
+        return forumWrapperList;
     }
 
 }

@@ -72,22 +72,4 @@ public class NotifyWebSocketHandler extends TextWebSocketHandler {
     }
 
 
-//    public static void push(String content, Integer userLevel, LocalDateTime createTime){
-//
-//
-//        Long userId = BaseContext.getCurrentId();
-//        WebSocketSession s = ONLINE.get(userId);
-//
-//        if (s != null && s.isOpen()){
-//            try {
-//                s.sendMessage(new TextMessage(msg));
-//            } catch (IOException e){
-//                System.out.println("推送消息失败 userId=" + userId);
-//                ONLINE.remove(userId);//清理失效session
-//            }
-//
-//        }
-//    }
-
-
 }

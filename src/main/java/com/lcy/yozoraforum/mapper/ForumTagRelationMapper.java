@@ -2,6 +2,7 @@ package com.lcy.yozoraforum.mapper;
 
 import com.lcy.yozoraforum.dto.ShowForumDTO;
 import com.lcy.yozoraforum.entity.Tags;
+import com.lcy.yozoraforum.wrapper.ForumWrapper;
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Mapper;
 
@@ -38,4 +39,10 @@ public interface ForumTagRelationMapper {
     void delete(Long forumId);
 
 
+    /**
+     * 根据分类标签查询帖子
+     * @param tagIds
+     * @return
+     */
+    List<ForumWrapper> selectForumByTags(List<Long> tagIds);
 }

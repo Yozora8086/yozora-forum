@@ -15,4 +15,16 @@
                  left join tags t on t.tag_id = f.tag_id
         where f.forum_id = #{forumId};
     </select>
+
+    <select id="selectForumByTags" resultType="com.lcy.yozoraforum.wrapper.ForumWrapper">
+        select f.*,count(c.comment_id) AS forum_comment_count, u.user_name from forum_tag_relation ftr
+        left join forum f  on ftr.forum_id = f.forum_id
+        left join comments c on ftr.forum_id  = c.forum_id
+        left join user u on f.user_id = u.user_id
+        where ftr.tag_id in
+        <foreach collection="tagIds" item="tagId" separator="," open="(" close=")">
+            #{tagId}
+        </foreach>
+        GROUP BY f.forum_id
+    </select>
 </mapper>
